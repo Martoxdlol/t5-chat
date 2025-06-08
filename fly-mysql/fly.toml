@@ -1,0 +1,36 @@
+# fly.toml app configuration file generated for t5-chat-db on 2025-06-08T11:43:13-03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 't5-chat-db'
+primary_region = 'sjc'
+
+[build]
+  image = 'mysql:8.4'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+
+[processes]
+ app = """--datadir /data/mysql \
+   --mysql-native-password=ON"""
+
+[mounts]
+  source = "mysqldata"
+  destination = "/data"
+
+[env]
+  MYSQL_DATABASE = "chat"
+  MYSQL_USER = "appuser"
