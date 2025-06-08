@@ -30,4 +30,4 @@ COPY --from=builder /app/dist /app/dist
 ENV NODE_ENV=production
 
 # Start server
-CMD [ "node", "/app/dist/server/main.mjs" ]
+CMD [ "node", "/app/dist/server/main.cjs" ]
