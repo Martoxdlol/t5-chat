@@ -9,7 +9,7 @@
         "dev:app": "vite",
         "dev:server": "tsx --watch --env-file=.env src/server/main.ts",
         "build:app": "tsc -b && vite build",
-        "build:server": "esbuild src/server/main.ts --bundle --platform=node --outfile=dist/server/main.mjs --format=esm",
+        "build:server": "esbuild src/server/main.ts --bundle --platform=node --outfile=dist/server/main.cjs --format=cjs",
         "preview:app": "vite preview",
         "lint": "biome check",
         "format": "biome format --write",
