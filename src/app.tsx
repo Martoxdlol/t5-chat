@@ -1,24 +1,14 @@
-import { useQuery } from '@tanstack/react-query'
-import { Button } from './components/ui/button'
-import { useTRPC } from './lib/api-client'
-import { authClient } from './lib/auth-client'
+import { RouterProvider } from 'react-router'
+import { Screen } from './components/scaffolding/screen'
+import { ApiProvider } from './lib/api-provider'
+import { router } from './router'
 
 export default function App() {
-    const trpc = useTRPC()
-
-    const { data } = useQuery(trpc.hello.queryOptions())
-
-    const session = authClient.useSession()
-
     return (
-        <Button
-            onClick={() =>
-                authClient.signIn.social({
-                    provider: 'google',
-                })
-            }
-        >
-            {data} ({session.data?.user.email})
-        </Button>
+        <Screen>
+            <ApiProvider>
+                <RouterProvider router={router} />
+            </ApiProvider>
+        </Screen>
     )
 }

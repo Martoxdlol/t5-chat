@@ -15,7 +15,6 @@ const defaultUrl = 'mysql://root:password@localhost:3306/chat'
 export async function createDatabasePool(): Promise<mysql.Pool> {
     const url = new URL(process.env.DATABASE_URL || defaultUrl)
 
-
     const pool = mysql.createPool({
         host: url.hostname,
         user: url.username,

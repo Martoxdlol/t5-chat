@@ -17,7 +17,6 @@ async function main() {
         app.get('/*', serveStatic({ root: './dist/app', path: 'index.html' }))
     }
 
-
     serve(app)
 }
 
