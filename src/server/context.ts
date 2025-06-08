@@ -1,12 +1,13 @@
-import type { Pool } from 'mysql2/promise'
-import { createDatabase } from './db'
+import { createDatabasePool, createDrizzle, type DBType } from './db'
 
 export type Context = {
-    db: Pool
+    db: DBType
 }
 
 export async function createContext(): Promise<Context> {
+    const client = await createDatabasePool()
+
     return {
-        db: await createDatabase(),
+        db: createDrizzle(client),
     }
 }
