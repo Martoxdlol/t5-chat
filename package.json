@@ -1,40 +1,43 @@
 {
-  "name": "t5-chat",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "npm-run-all --parallel dev:app dev:server",
-    "build": "pnpm run build:app && pnpm run build:server",
-    "dev:app": "vite",
-    "dev:server": "tsx --watch --env-file=.env src/server/main.ts",
-    "build:app": "tsc -b && vite build",
-    "build:server": "esbuild src/server/main.ts --bundle --platform=node --outfile=dist/server/main.js --format=esm",
-    "preview:app": "vite preview"
-  },
-  "dependencies": {
-    "@hono/node-server": "^1.14.4",
-    "@tailwindcss/vite": "^4.1.8",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "hono": "^4.7.11",
-    "lucide-react": "^0.513.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "tailwind-merge": "^3.3.0",
-    "tailwindcss": "^4.1.8"
-  },
-  "devDependencies": {
-    "@types/node": "^22.15.30",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "@vitejs/plugin-react": "^4.4.1",
-    "esbuild": "^0.25.5",
-    "globals": "^16.0.0",
-    "npm-run-all": "^4.1.5",
-    "tsx": "^4.19.4",
-    "tw-animate-css": "^1.3.4",
-    "typescript": "~5.8.3",
-    "vite": "^6.3.5"
-  }
+    "name": "t5-chat",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "npm-run-all --parallel dev:app dev:server",
+        "build": "pnpm run build:app && pnpm run build:server",
+        "dev:app": "vite",
+        "dev:server": "tsx --watch --env-file=.env src/server/main.ts",
+        "build:app": "tsc -b && vite build",
+        "build:server": "esbuild src/server/main.ts --bundle --platform=node --outfile=dist/server/main.js --format=esm",
+        "preview:app": "vite preview",
+        "lint": "biome check",
+        "format": "biome format --write"
+    },
+    "dependencies": {
+        "@hono/node-server": "^1.14.4",
+        "@tailwindcss/vite": "^4.1.8",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "hono": "^4.7.11",
+        "lucide-react": "^0.513.0",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
+        "tailwind-merge": "^3.3.0",
+        "tailwindcss": "^4.1.8"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^1.9.4",
+        "@types/node": "^22.15.30",
+        "@types/react": "^19.1.2",
+        "@types/react-dom": "^19.1.2",
+        "@vitejs/plugin-react": "^4.4.1",
+        "esbuild": "^0.25.5",
+        "globals": "^16.0.0",
+        "npm-run-all": "^4.1.5",
+        "tsx": "^4.19.4",
+        "tw-animate-css": "^1.3.4",
+        "typescript": "~5.8.3",
+        "vite": "^6.3.5"
+    }
 }
