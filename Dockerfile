@@ -26,6 +26,9 @@ FROM node:24-slim
 # Copy dist from builder
 COPY --from=builder /app/dist /app/dist
 
+# Set working directory
+WORKDIR /app
+
 # Set node prod environment
 ENV NODE_ENV=production
 
