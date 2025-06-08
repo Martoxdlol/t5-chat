@@ -1,11 +1,18 @@
 import { betterAuth } from 'better-auth'
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import type { DBType } from './db'
 
-export const auth = betterAuth({
-    secret: process.env.BETTER_AUTH_SECRET,
-    socialProviders: {
-        google: {
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+export function createAuth(db: DBType) {
+    return betterAuth({
+        secret: process.env.BETTER_AUTH_SECRET,
+        database: drizzleAdapter(db, {
+            provider: 'mysql',
+        }),
+        socialProviders: {
+            google: {
+                clientId: process.env.GOOGLE_CLIENT_ID!,
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            },
         },
-    },
-})
+    })
+}
