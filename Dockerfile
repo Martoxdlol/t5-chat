@@ -26,5 +26,8 @@ FROM node:24-slim
 # Copy dist from builder
 COPY --from=builder /app/dist /app/dist
 
+# Set node prod environment
+ENV NODE_ENV=production
+
 # Start server
 CMD [ "node", "/app/dist/server/main.js" ]

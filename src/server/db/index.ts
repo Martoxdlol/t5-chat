@@ -13,7 +13,8 @@ export { schema }
 const defaultUrl = 'mysql://root:password@localhost:3306/chat'
 
 export async function createDatabasePool(): Promise<mysql.Pool> {
-    const url = new URL(import.meta.env.DATABASE_URL || defaultUrl)
+    const url = new URL(process.env.DATABASE_URL || defaultUrl)
+
 
     const pool = mysql.createPool({
         host: url.hostname,
@@ -40,7 +41,7 @@ export function createDrizzle(client: mysql.Connection): DBType {
     return drizzle({
         client,
         schema,
-        mode: import.meta.env.DRIZZLE_PLANETSCALE_MODE === 'true' ? 'planetscale' : 'default',
+        mode: process.env.DRIZZLE_PLANETSCALE_MODE === 'true' ? 'planetscale' : 'default',
     })
 }
 
