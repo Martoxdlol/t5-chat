@@ -1,7 +1,19 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
+import { createContext } from './context'
+import { trpcHandler } from './handler'
 
-const app = new Hono()
-app.get('/', (c) => c.text('Hello Node.js!'))
+async function main() {
+    const app = new Hono()
 
-serve(app)
+    const context = await createContext()
+
+    app.all('/api/trpc/*', (c) => trpcHandler(c.req.raw, context))
+
+    serve(app)
+}
+
+main().catch((err) => {
+    console.error('Error starting server:', err)
+    process.exit(1)
+})
