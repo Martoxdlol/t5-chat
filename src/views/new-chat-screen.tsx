@@ -55,7 +55,7 @@ export function NewChatScreen() {
                     navigate(`/chat/${chat.id}`)
                 })
         },
-        [newChatMutation.mutateAsync, queryClient.setQueryData, trpc.chat.getChatMessages.queryKey, navigate],
+        [newChatMutation.mutateAsync, queryClient.setQueryData, trpc.chat.getChatMessages.queryKey, navigate, queryClient.invalidateQueries, trpc.chat.listChats.queryFilter],
     )
 
     return (
