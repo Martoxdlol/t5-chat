@@ -41,8 +41,11 @@ export async function* generateMessage(
 
 export async function generateChatTitle(firstPrompt: string): Promise<string> {
     const result = streamText({
+        onError: (error) => {
+            console.error('Error generating chat title:', error)
+        },
         model: openai('o3-mini'),
-        maxTokens: 300,
+        maxTokens: 600,
         messages: [
             {
                 role: 'system',
@@ -59,4 +62,54 @@ export async function generateChatTitle(firstPrompt: string): Promise<string> {
     }
 
     return title.trim() || 'Unnamed Chat'
+}
+
+export async function generateChatColor(firstPrompt: string): Promise<string> {
+    const result = streamText({
+        onError: (error) => {
+            console.error('Error generating chat title:', error)
+        },
+        model: openai('o3-mini'),
+        maxTokens: 600,
+        messages: [
+            {
+                role: 'system',
+                content:
+                    'You are instructed to generate a color based on the feeling of the chat. The color must be a valid hex code including the hash symbol, e.g., #FF5733. The color should reflect the mood or topic of the chat. You must output only the hex color code, without any additional text or characters.',
+            },
+            { role: 'user', content: firstPrompt },
+        ],
+    })
+
+    let color = ''
+    for await (const chunk of result.textStream) {
+        color += chunk
+    }
+
+    return color.trim() || '#FFFFFF' // Default to white if no color is generated
+}
+
+export async function generateChatEmoji(firstPrompt: string): Promise<string> {
+    const result = streamText({
+        onError: (error) => {
+            console.error('Error generating chat title:', error)
+        },
+        model: openai('o3-mini'),
+        maxTokens: 600,
+        messages: [
+            {
+                role: 'system',
+                content:
+                    'You are instructed to generate an emoji that represents the chat. The emoji should be relevant to the topic or mood of the conversation. You must output a emoji character, e.g., 😊, 🚀, (or any other). Do not output any text or additional characters.',
+            },
+            { role: 'user', content: firstPrompt },
+        ],
+    })
+
+    let emoji = ''
+    for await (const chunk of result.textStream) {
+        emoji += chunk
+    }
+
+    return emoji.trim() || '💬' // Default to a speech bubble if no emoji is generated
 }

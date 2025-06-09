@@ -1,14 +1,15 @@
-import { createBrowserRouter, Outlet } from 'react-router'
+import { createBrowserRouter } from 'react-router'
+import { AuthWrapper } from './views/auth-wrapper'
 import { ChatScreen } from './views/chat-screen'
-import { Layout } from './views/layout'
 import { NewChatScreen } from './views/new-chat-screen'
+import { RootLayoutElement } from './views/root-layout'
 
 export const router = createBrowserRouter([
     {
         element: (
-            <Layout>
-                <Outlet />
-            </Layout>
+            <AuthWrapper>
+                <RootLayoutElement />
+            </AuthWrapper>
         ),
         children: [
             {
@@ -16,7 +17,11 @@ export const router = createBrowserRouter([
                 element: <NewChatScreen />,
             },
             {
-                path: '/chat/:chatId',
+                path: '/chats',
+                element: <p>placeholder</p>,
+            },
+            {
+                path: '/chats/:chatId',
                 element: <ChatScreen />,
             },
         ],

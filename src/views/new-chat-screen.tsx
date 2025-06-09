@@ -6,7 +6,7 @@ import { DisplayMessage } from '@/components/chat/message'
 import { useTRPC } from '@/lib/api-client'
 import { MessageContent } from '@/lib/message-content'
 import type { ChatMessage, Prompt } from '@/lib/types'
-import { ChatView } from './chat'
+import { ChatView } from './chat-view'
 
 export function NewChatScreen() {
     const [optimisticMsg, setOptimisticMsg] = useState<string | null>(null)
@@ -56,26 +56,28 @@ export function NewChatScreen() {
 
                     queryClient.invalidateQueries(trpc.chat.listChats.queryFilter())
 
-                    navigate(`/chat/${chat.id}`)
+                    navigate(`/chats/${chat.id}`)
 
                     chat.titleGenerator.then((title) => {
-                        queryClient.setQueryData(
-                            trpc.chat.listChats.queryKey(),
-                            (oldChats) => {
-                                return oldChats?.map((c) =>
-                                    c.id === chat.id ? { ...c, title } : c
-                                )
-                            },
-                        )
+                        queryClient.setQueryData(trpc.chat.listChats.queryKey(), (oldChats) => {
+                            return oldChats?.map((c) => (c.id === chat.id ? { ...c, title } : c))
+                        })
+                    })
+
+                    chat.colorGenerator.then((color) => {
+                        queryClient.setQueryData(trpc.chat.listChats.queryKey(), (oldChats) => {
+                            return oldChats?.map((c) => (c.id === chat.id ? { ...c, color } : c))
+                        })
+                    })
+
+                    chat.emojiGenerator.then((emoji) => {
+                        queryClient.setQueryData(trpc.chat.listChats.queryKey(), (oldChats) => {
+                            return oldChats?.map((c) => (c.id === chat.id ? { ...c, emoji } : c))
+                        })
                     })
                 })
         },
-        [
-            newChatMutation,
-            queryClient,
-            trpc,
-            navigate,
-        ],
+        [newChatMutation, queryClient, trpc, navigate],
     )
 
     return (

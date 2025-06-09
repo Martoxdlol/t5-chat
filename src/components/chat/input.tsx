@@ -3,7 +3,7 @@ import { memo, useCallback, useState } from 'react'
 import type { Prompt } from '@/lib/types'
 import { Button } from '../ui/button'
 
-const MIN_ROWS = 3
+const MIN_ROWS = 2
 const MAX_ROWS = 10
 
 export const MessageInput = memo(MessageInputComponent)
@@ -44,20 +44,23 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
     )
 
     return (
-        <form
-            className='flex w-full gap-4 rounded-t-lg bg-secondary/5 p-4 ring-8 ring-secondary/15'
-            onSubmit={handleSubmit}
-        >
-            <textarea
-                name='message'
-                className='w-full resize-none bg-transparent text-base text-foreground leading-6 outline-none placeholder:text-secondary-foreground/60 disabled:opacity-0'
-                placeholder='Type your message here...'
-                rows={rows}
-                onChange={handleOnChange}
-            />
-            <Button type='submit' size='icon'>
-                <SendHorizontal />
-            </Button>
+        <form className='w-full gap-4 border-t border-t-primary/10 p-4' onSubmit={handleSubmit}>
+            <div className='flex items-start gap-2'>
+                <textarea
+                    name='message'
+                    className='w-full resize-none rounded-md bg-accent p-2 text-base text-foreground leading-6 outline-none placeholder:text-secondary-foreground/60 disabled:opacity-0'
+                    placeholder='Type your message here...'
+                    rows={rows}
+                    onChange={handleOnChange}
+                />
+                <Button type='submit' size='icon'>
+                    <SendHorizontal />
+                </Button>
+            </div>
+            <div className='flex items-center gap-2'>
+                <p>Option 1</p>
+                <p>Option 2</p>
+            </div>
         </form>
     )
 }

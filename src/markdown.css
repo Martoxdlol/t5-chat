@@ -1,0 +1,60 @@
+/* --- Headings --- */
+.markdown-styles h1,
+.markdown-styles h2,
+.markdown-styles h3,
+.markdown-styles h4,
+.markdown-styles h5,
+.markdown-styles h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    line-height: 1.25;
+    color: #1a202c;
+    /* Gray 900 */
+}
+
+.markdown-styles h1 {
+    font-size: 2rem;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #e2e8f0;
+    /* Gray 300 */
+}
+
+.markdown-styles h2 {
+    font-size: 1.875rem;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #e2e8f0;
+    /* Gray 300 */
+}
+
+.markdown-styles h3 {
+    font-size: 1.5rem;
+}
+
+.markdown-styles h4 {
+    font-size: 1.25rem;
+}
+
+.markdown-styles h5 {
+    font-size: 1.125rem;
+}
+
+.markdown-styles h6 {
+    font-size: 1rem;
+    color: #718096;
+    /* Gray 600 */
+}
+
+/* --- Paragraphs --- */
+.markdown-styles p {
+    margin-bottom: 1rem;
+}
+
+/* --- Links --- */
+.markdown-styles a {
+    color: #3182ce;
+    /* Blue 600 */
+    text-decoration: none;
+    transition:
+        color 0.2s ease-in-out,
+        text-decoration;
+}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import Markdown from 'react-markdown'
 import type { ChatMessage } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -20,19 +21,28 @@ export function DisplayMessage(props: { message: ChatMessage }) {
         }
     }, [message])
 
-    return (
-        <div className={cn('my-1 flex px-2 sm:px-4', isUserMessage ? 'justify-end' : 'justify-start')}>
-            <div
-                className={cn(
-                    'max-w-[75%] rounded-xl px-3 py-2 sm:max-w-[70%] md:max-w-[65%]',
-                    { 'bg-secondary/50': props.message.role === 'assistant' },
-                    { 'bg-primary/50': props.message.role === 'user' },
-                )}
-            >
-                <p className='whitespace-pre-wrap break-words text-sm'>
-                    {props.message.status === 'generating' ? generated : message.content}
-                </p>
+    const content = generated ?? message.content
+
+    if (isUserMessage) {
+        return (
+            <div className={cn('my-1 flex justify-end px-2 sm:px-4')}>
+                <div className='max-w-[75%] rounded-xl bg-primary/50 px-3 py-2 sm:max-w-[70%] md:max-w-[65%]'>
+                    <div className='select-text markdown-styles'>
+                        <Markdown>{content}</Markdown>
+                    </div>
+                </div>
             </div>
-        </div>
-    )
+        )
+    }
+
+    if (message.role === 'assistant') {
+        return (
+            <div className='space-y-4 sm:p-4 md:p-10'>
+                <p className='font-semibold text-xs'>Assistant</p>
+                <div className='select-text markdown-styles'>
+                    <Markdown>{content}</Markdown>
+                </div>
+            </div>
+        )
+    }
 }

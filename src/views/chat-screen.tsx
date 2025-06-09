@@ -4,9 +4,9 @@ import { useParams } from 'react-router'
 import { MessageInput } from '@/components/chat/input'
 import { DisplayMessage } from '@/components/chat/message'
 import { useTRPC } from '@/lib/api-client'
+import { MessageContent } from '@/lib/message-content'
 import type { ChatMessage, Prompt } from '@/lib/types'
-import { cumulativeGenerator } from '@/lib/utils'
-import { ChatView } from './chat'
+import { ChatView } from './chat-view'
 
 export function ChatScreen() {
     const params = useParams()
@@ -46,7 +46,11 @@ export function ChatScreen() {
                         status: 'generating',
                         content: '',
                         createdAt: new Date(),
-                        generator: cumulativeGenerator('', generator),
+                        generator,
+                        contentManager: new MessageContent({
+                            content: '',
+                            generator,
+                        }),
                     }
 
                     queryClient.setQueryData(

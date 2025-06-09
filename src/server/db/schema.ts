@@ -8,6 +8,8 @@ export const chats = mysqlTable(
         userId: varchar('user_id', { length: 36 }).notNull(),
         id: varchar('id', { length: 36 }).notNull(),
         title: varchar('title', { length: 255 }).notNull(),
+        color: varchar('color', { length: 12 }),
+        emoji: varchar('emoji', { length: 12 }),
         createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
     },
     (t) => [primaryKey({ columns: [t.userId, t.id] })],

@@ -3,7 +3,13 @@ import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
 import { type ChatMessage, promptSchema } from '@/lib/types'
 import { schema } from '../db'
-import { generateChatTitle, generateMessage, getChatMessages } from '../service/chat'
+import {
+    generateChatColor,
+    generateChatEmoji,
+    generateChatTitle,
+    generateMessage,
+    getChatMessages,
+} from '../service/chat'
 import { protectedProcedure, router } from '../trpc'
 
 export const chatRouter = router({
@@ -14,6 +20,8 @@ export const chatRouter = router({
                     id: z.string(),
                     title: z.string(),
                     createdAt: z.date(),
+                    color: z.string().nullable(),
+                    emoji: z.string().nullable(),
                 }),
             ),
         )
@@ -23,6 +31,8 @@ export const chatRouter = router({
                     id: schema.chats.id,
                     title: schema.chats.title,
                     createdAt: schema.chats.createdAt,
+                    color: schema.chats.color,
+                    emoji: schema.chats.emoji,
                 })
                 .from(schema.chats)
                 .where(eq(schema.chats.userId, ctx.user.id))
@@ -94,14 +104,45 @@ export const chatRouter = router({
                     .where(and(eq(schema.chats.userId, ctx.user.id), eq(schema.chats.id, chatId)))
             }
 
+            function updateColor(newColor: string) {
+                return ctx.db
+                    .update(schema.chats)
+                    .set({ color: newColor })
+                    .where(and(eq(schema.chats.userId, ctx.user.id), eq(schema.chats.id, chatId)))
+            }
+
+            function updateEmoji(newEmoji: string) {
+                return ctx.db
+                    .update(schema.chats)
+                    .set({ emoji: newEmoji })
+                    .where(and(eq(schema.chats.userId, ctx.user.id), eq(schema.chats.id, chatId)))
+            }
+
+            const sanitizedPrompt = input.prompt.text
+                .replace(/[\n\r]+/g, '\\n')
+                .trim()
+                .slice(0, 500)
+
             return {
                 id: chatId,
                 title: chatTitle,
-                titleGenerator: generateChatTitle(input.prompt.text).then((title) => {
+                titleGenerator: generateChatTitle(sanitizedPrompt).then((title) => {
                     updateTitle(title).catch((error) => {
                         console.error('Error updating chat title:', error)
                     })
                     return title
+                }),
+                colorGenerator: generateChatColor(sanitizedPrompt).then((color) => {
+                    updateColor(color).catch((error) => {
+                        console.error('Error updating chat color:', error)
+                    })
+                    return color
+                }),
+                emojiGenerator: generateChatEmoji(sanitizedPrompt).then((emoji) => {
+                    updateEmoji(emoji).catch((error) => {
+                        console.error('Error updating chat emoji:', error)
+                    })
+                    return emoji
                 }),
                 createdAt: createdAt,
                 firstResponseGenerator: generateMessage(
