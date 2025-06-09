@@ -9,21 +9,19 @@ export function ChatsListView() {
     const { data: chats } = useQuery(trpc.chat.listChats.queryOptions())
 
     return (
-        <div className='size-full overflow-y-auto'>
-            <div className='sticky top-0 z-10 flex w-full flex-col bg-secondary/10 p-2 backdrop-blur-md'>
-                <div className='flex items-center justify-between'>
-                    <h1 className='font-semibold text-xl'>T5 Chat</h1>
-                    <Link
-                        to='/'
-                        type='button'
-                        className='flex size-12 items-center justify-center rounded-full hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50'
-                        title='New chat'
-                    >
-                        <MessageSquarePlusIcon />
-                    </Link>
-                </div>
+        <div className='flex size-full flex-col'>
+            <div className='flex h-14 shrink-0 items-center justify-between px-4'>
+                <h1 className='font-semibold text-xl'>T5 Chat</h1>
+                <Link
+                    to='/'
+                    type='button'
+                    className='flex size-12 items-center justify-center rounded-full hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50'
+                    title='New chat'
+                >
+                    <MessageSquarePlusIcon />
+                </Link>
             </div>
-            <ul className='flex h-fit flex-col'>
+            <ul className='flex min-h-0 shrink grow flex-col overflow-y-auto'>
                 {chats?.map((chat) => (
                     <li key={chat.id} className='block px-2 py-1'>
                         <Link
@@ -32,12 +30,15 @@ export function ChatsListView() {
                             state={'back-to-home'}
                         >
                             <div
-                                className='flex size-12 items-center justify-center rounded-full bg-muted p-2'
+                                className='flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted p-2'
                                 style={{ backgroundColor: chat.color || undefined }}
                             >
                                 {chat.emoji}
                             </div>
-                            {chat.title}
+                            <div className='min-w-0 shrink grow'>
+                                <p className='w-full overflow-hidden text-ellipsis text-nowrap'>{chat.title}</p>
+                                <p className='w-full overflow-hidden text-ellipsis text-nowrap text-primary text-xs'>{chat.lastMessage}</p>
+                            </div>
                         </Link>
                     </li>
                 ))}

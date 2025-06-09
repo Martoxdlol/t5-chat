@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm'
+import { and, desc, eq, sql } from 'drizzle-orm'
 import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
 import { type ChatMessage, promptSchema } from '@/lib/types'
@@ -22,6 +22,7 @@ export const chatRouter = router({
                     createdAt: z.date(),
                     color: z.string().nullable(),
                     emoji: z.string().nullable(),
+                    lastMessage: z.string().nullable(),
                 }),
             ),
         )
@@ -33,11 +34,16 @@ export const chatRouter = router({
                     createdAt: schema.chats.createdAt,
                     color: schema.chats.color,
                     emoji: schema.chats.emoji,
+                    lastMessage: sql<string>`(select content from message where user_id = ${ctx.user.id} and chat_id = ${schema.chats.id} order by \`index\` desc limit 1)`,
                 })
                 .from(schema.chats)
                 .where(eq(schema.chats.userId, ctx.user.id))
                 .orderBy(desc(schema.chats.createdAt))
-
+                .catch((error) => {
+                    console.error('Error fetching chats:', error)
+                    throw new Error('Failed to fetch chats')
+                })
+            console.log(chats)
             return chats
         }),
 
