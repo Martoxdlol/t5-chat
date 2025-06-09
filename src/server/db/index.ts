@@ -50,3 +50,5 @@ export type TXType = MySqlTransaction<
     typeof schema,
     ExtractTablesWithRelations<typeof schema>
 >
+
+export type DBTX = DBType | TXType

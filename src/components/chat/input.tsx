@@ -1,11 +1,14 @@
+import { SendHorizontal } from 'lucide-react'
 import { memo, useCallback, useState } from 'react'
+import type { Prompt } from '@/lib/models'
+import { Button } from '../ui/button'
 
 const MIN_ROWS = 3
 const MAX_ROWS = 10
 
 export const MessageInput = memo(MessageInputComponent)
 
-function MessageInputComponent() {
+function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
     const [rows, setRows] = useState(3)
 
     const handleOnChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -22,14 +25,39 @@ function MessageInputComponent() {
         setRows(Math.max(rows, MIN_ROWS))
     }, [])
 
+    const handleSubmit = useCallback(
+        (e: React.FormEvent<HTMLFormElement>) => {
+            e.preventDefault()
+            const formData = new FormData(e.currentTarget)
+            const text = formData.get('message')?.toString().trim() || ''
+
+            if (text.length === 0) {
+                return
+            }
+
+            props.onPrompt?.({
+                text,
+                model: 'TODO:implement-model-selection',
+            })
+        },
+        [props.onPrompt],
+    )
+
     return (
-        <form className='w-full gap-4 rounded-t-lg bg-secondary/5 p-4 ring-8 ring-secondary/15'>
+        <form
+            className='flex w-full gap-4 rounded-t-lg bg-secondary/5 p-4 ring-8 ring-secondary/15'
+            onSubmit={handleSubmit}
+        >
             <textarea
+                name='message'
                 className='w-full resize-none bg-transparent text-base text-foreground leading-6 outline-none placeholder:text-secondary-foreground/60 disabled:opacity-0'
                 placeholder='Type your message here...'
                 rows={rows}
                 onChange={handleOnChange}
             />
+            <Button type='submit' size='icon'>
+                <SendHorizontal />
+            </Button>
         </form>
     )
 }

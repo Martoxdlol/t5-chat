@@ -7,6 +7,6 @@ export function trpcHandler(req: Request, context: Context) {
         endpoint: '/api/trpc',
         req,
         router: appRouter,
-        createContext: () => context,
+        createContext: () => ({ ...context, req }),
     })
 }
