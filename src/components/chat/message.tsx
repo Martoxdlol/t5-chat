@@ -36,7 +36,7 @@ export function DisplayMessage(props: { message: ChatMessage }) {
 
     if (message.role === 'assistant') {
         return (
-            <div className='space-y-4 sm:p-4 md:p-10'>
+            <div className='space-y-4 p-4 md:p-10'>
                 <RenderMarkdown code={content} />
             </div>
         )
