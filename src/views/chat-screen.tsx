@@ -5,6 +5,7 @@ import { MessageInput } from '@/components/chat/input'
 import { DisplayMessage } from '@/components/chat/message'
 import { useTRPC } from '@/lib/api-client'
 import type { ChatMessage, Prompt } from '@/lib/models'
+import { cumulativeGenerator } from '@/lib/utils'
 import { ChatView } from './chat'
 
 export function ChatScreen() {
@@ -45,7 +46,7 @@ export function ChatScreen() {
                         status: 'generating',
                         content: '',
                         createdAt: new Date(),
-                        generator,
+                        generator: cumulativeGenerator('', generator),
                     }
 
                     queryClient.setQueryData(

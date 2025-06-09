@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
 import { type ChatMessage, promptSchema } from '@/lib/models'
 import { schema } from '../db'
-import { generateMessage, getChatMessages } from '../service/chat'
+import { createChatTitle, generateMessage, getChatMessages } from '../service/chat'
 import { protectedProcedure, router } from '../trpc'
 
 export const chatRouter = router({
@@ -93,10 +93,22 @@ export const chatRouter = router({
                     )
             }
 
+            function updateTitle(newTitle: string) {
+                return ctx.db
+                    .update(schema.chats)
+                    .set({ title: newTitle })
+                    .where(and(eq(schema.chats.userId, ctx.user.id), eq(schema.chats.id, chatId)))
+            }
+
             return {
                 id: chatId,
                 title: chatTitle,
-                titleGenerator: Promise.resolve(chatTitle),
+                titleGenerator: createChatTitle(chatTitle).then((title) => {
+                    updateTitle(title).catch((error) => {
+                        console.error('Error updating chat title:', error)
+                    })
+                    return title
+                }),
                 createdAt: createdAt,
                 firstResponseGenerator: generateMessage(
                     [

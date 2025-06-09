@@ -5,6 +5,7 @@ import { MessageInput } from '@/components/chat/input'
 import { DisplayMessage } from '@/components/chat/message'
 import { useTRPC } from '@/lib/api-client'
 import type { ChatMessage, Prompt } from '@/lib/models'
+import { cumulativeGenerator } from '@/lib/utils'
 import { ChatView } from './chat'
 
 export function NewChatScreen() {
@@ -44,10 +45,12 @@ export function NewChatScreen() {
                                 status: 'generating',
                                 content: '',
                                 createdAt: chat.createdAt,
-                                generator: chat.firstResponseGenerator,
+                                generator: cumulativeGenerator('', chat.firstResponseGenerator),
                             },
                         ] as ChatMessage[]
                     })
+
+                    queryClient.invalidateQueries(trpc.chat.listChats.queryFilter({}))
 
                     navigate(`/chat/${chat.id}`)
                 })

@@ -15,11 +15,8 @@ export function DisplayMessage(props: { message: ChatMessage }) {
             const generator = message.generator
 
             const fetchGeneratedText = async () => {
-                let text = ''
-                for await (const chunk of generator) {
-                    text += chunk
+                for await (const text of generator) {
                     setGenerated(text)
-                    console.log(text)
                 }
             }
 
