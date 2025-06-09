@@ -4,7 +4,7 @@ import { useParams } from 'react-router'
 import { MessageInput } from '@/components/chat/input'
 import { DisplayMessage } from '@/components/chat/message'
 import { useTRPC } from '@/lib/api-client'
-import type { ChatMessage, Prompt } from '@/lib/models'
+import type { ChatMessage, Prompt } from '@/lib/types'
 import { cumulativeGenerator } from '@/lib/utils'
 import { ChatView } from './chat'
 

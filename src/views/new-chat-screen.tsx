@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router'
 import { MessageInput } from '@/components/chat/input'
 import { DisplayMessage } from '@/components/chat/message'
 import { useTRPC } from '@/lib/api-client'
-import type { ChatMessage, Prompt } from '@/lib/models'
-import { cumulativeGenerator } from '@/lib/utils'
+import { MessageContent } from '@/lib/message-content'
+import type { ChatMessage, Prompt } from '@/lib/types'
 import { ChatView } from './chat'
 
 export function NewChatScreen() {
@@ -45,7 +45,11 @@ export function NewChatScreen() {
                                 status: 'generating',
                                 content: '',
                                 createdAt: chat.createdAt,
-                                generator: cumulativeGenerator('', chat.firstResponseGenerator),
+                                generator: chat.firstResponseGenerator,
+                                contentManager: new MessageContent({
+                                    content: '',
+                                    generator: chat.firstResponseGenerator,
+                                }),
                             },
                         ] as ChatMessage[]
                     })
@@ -55,7 +59,14 @@ export function NewChatScreen() {
                     navigate(`/chat/${chat.id}`)
                 })
         },
-        [newChatMutation.mutateAsync, queryClient.setQueryData, trpc.chat.getChatMessages.queryKey, navigate, queryClient.invalidateQueries, trpc.chat.listChats.queryFilter],
+        [
+            newChatMutation.mutateAsync,
+            queryClient.setQueryData,
+            trpc.chat.getChatMessages.queryKey,
+            navigate,
+            queryClient.invalidateQueries,
+            trpc.chat.listChats.queryFilter,
+        ],
     )
 
     return (

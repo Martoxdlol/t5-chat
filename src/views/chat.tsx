@@ -15,10 +15,7 @@ export function ChatView(props: { children?: React.ReactNode; input: React.React
                 <div className='w-full max-w-3xl'>{props.children}</div>
 
                 <div className='absolute right-0 bottom-0 left-0 flex justify-center' ref={inputWrapperRef}>
-                    <div className='w-full max-w-3xl bg-white/50 backdrop-blur-sm'>
-                        {props.input}
-
-                    </div>
+                    <div className='w-full max-w-3xl bg-white/50 backdrop-blur-sm'>{props.input}</div>
                 </div>
             </div>
         </div>

@@ -1,6 +1,6 @@
 import { SendHorizontal } from 'lucide-react'
 import { memo, useCallback, useState } from 'react'
-import type { Prompt } from '@/lib/models'
+import type { Prompt } from '@/lib/types'
 import { Button } from '../ui/button'
 
 const MIN_ROWS = 3

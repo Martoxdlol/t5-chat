@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { ChatMessage } from '@/lib/models'
+import type { ChatMessage } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 export function DisplayMessage(props: { message: ChatMessage }) {
@@ -11,18 +11,12 @@ export function DisplayMessage(props: { message: ChatMessage }) {
     const [generated, setGenerated] = useState<string | null>(null)
 
     useEffect(() => {
-        if (message.generator) {
-            const generator = message.generator
+        const unsub = message.contentManager?.subscribe((content) => {
+            setGenerated(content)
+        })
 
-            const fetchGeneratedText = async () => {
-                for await (const text of generator) {
-                    setGenerated(text)
-                }
-            }
-
-            fetchGeneratedText().catch((error) => {
-                console.error('Error fetching generated text:', error)
-            })
+        return () => {
+            unsub?.()
         }
     }, [message])
 
@@ -36,8 +30,7 @@ export function DisplayMessage(props: { message: ChatMessage }) {
                 )}
             >
                 <p className='whitespace-pre-wrap break-words text-sm'>
-                    {message.content}
-                    {props.message.status === 'generating' && generated}
+                    {props.message.status === 'generating' ? generated : message.content}
                 </p>
             </div>
         </div>

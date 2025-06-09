@@ -1,7 +1,7 @@
 import { and, desc, eq } from 'drizzle-orm'
 import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
-import { type ChatMessage, promptSchema } from '@/lib/models'
+import { type ChatMessage, promptSchema } from '@/lib/types'
 import { schema } from '../db'
 import { createChatTitle, generateMessage, getChatMessages } from '../service/chat'
 import { protectedProcedure, router } from '../trpc'

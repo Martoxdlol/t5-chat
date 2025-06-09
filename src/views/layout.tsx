@@ -1,4 +1,4 @@
-import { Sidenav } from "@/components/nav";
+import { Sidenav } from '@/components/nav'
 
 export function Layout(props: { children: React.ReactNode }) {
     return (

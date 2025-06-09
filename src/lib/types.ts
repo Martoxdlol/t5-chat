@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { MessageContent } from './message-content'
 
 export const promptSchema = z.object({
     text: z.string().min(1, 'Prompt text is required'),
@@ -14,4 +15,5 @@ export type ChatMessage = {
     content: string
     createdAt: Date
     generator?: AsyncGenerator<string>
+    contentManager?: MessageContent
 }
