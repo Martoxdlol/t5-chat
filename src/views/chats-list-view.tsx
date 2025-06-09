@@ -29,6 +29,7 @@ export function ChatsListView() {
                         <Link
                             to={`/chats/${chat.id}`}
                             className='flex items-center gap-2 rounded-md p-2 hover:bg-accent'
+                            state={'back-to-home'}
                         >
                             <div
                                 className='flex size-12 items-center justify-center rounded-full bg-muted p-2'

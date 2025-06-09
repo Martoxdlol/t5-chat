@@ -25,6 +25,7 @@ export async function* generateMessage(
 ): AsyncGenerator<string> {
     const result = streamText({
         model: openai('gpt-4o-mini'),
+        system: 'You are a helpful assistant that generates responses based on user messages. You output markdown formatted text with support for code blocks, math equations, and other markdown features. Use $$ for any math expression and symbols. Ensure all math is wrapped correctly.',
         messages: messages.map((msg) => ({
             content: msg.content,
             role: msg.role,

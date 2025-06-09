@@ -9,7 +9,7 @@ const MAX_ROWS = 10
 export const MessageInput = memo(MessageInputComponent)
 
 function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
-    const [rows, setRows] = useState(3)
+    const [rows, setRows] = useState(MIN_ROWS)
 
     const handleOnChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
         let rows = 1
