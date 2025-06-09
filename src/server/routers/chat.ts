@@ -3,16 +3,11 @@ import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
 import { type ChatMessage, promptSchema } from '@/lib/types'
 import { schema } from '../db'
-import { createChatTitle, generateMessage, getChatMessages } from '../service/chat'
+import { generateChatTitle, generateMessage, getChatMessages } from '../service/chat'
 import { protectedProcedure, router } from '../trpc'
 
 export const chatRouter = router({
     listChats: protectedProcedure
-        .input(
-            z.object({
-                recent: z.boolean().default(false),
-            }),
-        )
         .output(
             z.array(
                 z.object({
@@ -22,7 +17,7 @@ export const chatRouter = router({
                 }),
             ),
         )
-        .query(async ({ ctx, input }) => {
+        .query(async ({ ctx }) => {
             const chats = await ctx.db
                 .select({
                     id: schema.chats.id,
@@ -32,7 +27,6 @@ export const chatRouter = router({
                 .from(schema.chats)
                 .where(eq(schema.chats.userId, ctx.user.id))
                 .orderBy(desc(schema.chats.createdAt))
-                .limit(input.recent ? 10 : 5000)
 
             return chats
         }),
@@ -103,7 +97,7 @@ export const chatRouter = router({
             return {
                 id: chatId,
                 title: chatTitle,
-                titleGenerator: createChatTitle(chatTitle).then((title) => {
+                titleGenerator: generateChatTitle(input.prompt.text).then((title) => {
                     updateTitle(title).catch((error) => {
                         console.error('Error updating chat title:', error)
                     })

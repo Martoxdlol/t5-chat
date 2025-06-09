@@ -7,7 +7,7 @@ import { Button } from './ui/button'
 export function Sidenav() {
     const trpc = useTRPC()
 
-    const { data: chats } = useQuery(trpc.chat.listChats.queryOptions({}))
+    const { data: chats } = useQuery(trpc.chat.listChats.queryOptions())
 
     return (
         <>

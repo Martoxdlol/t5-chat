@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai'
-import { generateText, streamText } from 'ai'
+import { streamText } from 'ai'
 import { and, asc, eq } from 'drizzle-orm'
 import type { ChatMessage } from '@/lib/types'
 import { type DBTX, schema } from '../db'
@@ -39,19 +39,24 @@ export async function* generateMessage(
     }
 }
 
-export async function createChatTitle(firstPrompt: string): Promise<string> {
-    return await generateText({
-        model: openai('gpt-4o-mini'),
+export async function generateChatTitle(firstPrompt: string): Promise<string> {
+    const result = streamText({
+        model: openai('o3-mini'),
+        maxTokens: 300,
         messages: [
             {
                 role: 'system',
                 content:
-                    'You are a helpful assistant that generates titles for chat conversations. You only respond with the title, no additional text, no quotes.',
+                    'You are instructed to generate chat titles based on the content of the first message. The title must be concise and it must summarize the topic of the conversation.',
             },
-            {
-                role: 'user',
-                content: `Generate a concise and descriptive title for a chat conversation based on the following prompt: ${firstPrompt}`,
-            },
+            { role: 'user', content: firstPrompt },
         ],
-    }).then((result) => result.text.trim())
+    })
+
+    let title = ''
+    for await (const chunk of result.textStream) {
+        title += chunk
+    }
+
+    return title.trim() || 'Unnamed Chat'
 }

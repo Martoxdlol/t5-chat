@@ -54,18 +54,27 @@ export function NewChatScreen() {
                         ] as ChatMessage[]
                     })
 
-                    queryClient.invalidateQueries(trpc.chat.listChats.queryFilter({}))
+                    queryClient.invalidateQueries(trpc.chat.listChats.queryFilter())
 
                     navigate(`/chat/${chat.id}`)
+
+                    chat.titleGenerator.then((title) => {
+                        queryClient.setQueryData(
+                            trpc.chat.listChats.queryKey(),
+                            (oldChats) => {
+                                return oldChats?.map((c) =>
+                                    c.id === chat.id ? { ...c, title } : c
+                                )
+                            },
+                        )
+                    })
                 })
         },
         [
-            newChatMutation.mutateAsync,
-            queryClient.setQueryData,
-            trpc.chat.getChatMessages.queryKey,
+            newChatMutation,
+            queryClient,
+            trpc,
             navigate,
-            queryClient.invalidateQueries,
-            trpc.chat.listChats.queryFilter,
         ],
     )
 
