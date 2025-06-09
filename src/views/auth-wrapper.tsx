@@ -6,7 +6,7 @@ import { authClient } from '@/lib/auth-client'
 export function AuthWrapper(props: { children: React.ReactNode }) {
     const user = useAuth()
 
-    const isLoading = user === undefined
+    // const isLoading = user === undefined
 
     if (!user) {
         return (
