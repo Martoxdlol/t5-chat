@@ -26,7 +26,10 @@ function ChatsListViewComponent() {
 function ChatsListViewContent() {
     const trpc = useTRPC()
 
-    const { data: chats } = useSuspenseQuery(trpc.chat.listChats.queryOptions())
+    const { data: chats } = useSuspenseQuery(trpc.chat.listChats.queryOptions(undefined, {
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
+    }))
 
     const params = useParams()
 
