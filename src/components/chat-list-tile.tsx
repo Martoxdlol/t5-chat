@@ -11,11 +11,12 @@ function ChatListTileComponent(props: {
     lastMessage?: string | null
     chatId: string
     selected?: boolean
+    style?: React.CSSProperties
 }) {
     const navigate = useNavigate()
 
     return (
-        <li className='block px-2 py-1'>
+        <li className='flex shrink-0 items-center overflow-hidden px-2 py-1' style={props.style}>
             <Link
                 onMouseDown={(e) => {
                     navigate(e.currentTarget.pathname, {

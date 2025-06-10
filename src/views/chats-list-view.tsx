@@ -1,50 +1,79 @@
-import { useQuery } from '@tanstack/react-query'
-import { LogOutIcon, MessageSquarePlusIcon } from 'lucide-react'
-import { useNavigate, useParams } from 'react-router'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { useVirtualizer } from '@tanstack/react-virtual'
+import { memo, Suspense, useRef } from 'react'
+import { useParams } from 'react-router'
+import { Center } from '@/components/center'
 import { ChatListTile } from '@/components/chat-list-tile'
-import { IconButton } from '@/components/icon-button'
+import { Spinner } from '@/components/spinner'
 import { useTRPC } from '@/lib/api-client'
-import { authClient } from '@/lib/auth-client'
 
-export function ChatsListView() {
+export const ChatsListView = memo(ChatsListViewComponent)
+
+function ChatsListViewComponent() {
+    return (
+        <Suspense
+            fallback={
+                <Center>
+                    <Spinner />
+                </Center>
+            }
+        >
+            <ChatsListViewContent />
+        </Suspense>
+    )
+}
+
+function ChatsListViewContent() {
     const trpc = useTRPC()
 
-    const { data: chats } = useQuery(trpc.chat.listChats.queryOptions())
+    const { data: chats } = useSuspenseQuery(trpc.chat.listChats.queryOptions())
 
     const params = useParams()
 
     const chatId = params.chatId
 
-    const navigate = useNavigate()
+    // The scrollable element for your list
+    const parentRef = useRef<HTMLUListElement>(null)
+
+    // The virtualizer
+    const rowVirtualizer = useVirtualizer({
+        count: chats.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 72,
+    })
 
     return (
-        <div className='flex size-full flex-col bg-background'>
-            <div className='flex h-14 shrink-0 items-center gap-1 px-4'>
-                <h1 className='grow font-semibold text-xl'>T5 Chat</h1>
-                <IconButton
-                    aria-label='Start New Chat'
-                    onMouseDown={() => authClient.signOut()}
-                    icon={<LogOutIcon />}
-                />
-                <IconButton
-                    aria-label='Start New Chat'
-                    onMouseDown={() => navigate('/')}
-                    icon={<MessageSquarePlusIcon />}
-                />
+        <ul className='min-h-0 shrink grow overflow-y-auto' ref={parentRef}>
+            <div
+                style={{
+                    height: `${rowVirtualizer.getTotalSize()}px`,
+                    width: '100%',
+                    position: 'relative',
+                }}
+            >
+                {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                    const chat = chats![virtualItem.index]!
+                    return (
+                        <ChatListTile
+                            key={chat.id}
+                            chatId={chat.id}
+                            title={chat.title}
+                            emoji={chat.emoji}
+                            color={chat.color}
+                            lastMessage={chat.lastMessage}
+                            selected={chat.id === chatId}
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: `${virtualItem.size}px`,
+                                transform: `translateY(${virtualItem.start}px)`,
+                            }}
+                        />
+                    )
+                })}
             </div>
-            <ul className='flex min-h-0 shrink grow flex-col overflow-y-auto'>
-                {chats?.map((chat) => (
-                    <ChatListTile
-                        key={chat.id}
-                        chatId={chat.id}
-                        title={chat.title}
-                        emoji={chat.emoji}
-                        color={chat.color}
-                        lastMessage={chat.lastMessage}
-                        selected={chat.id === chatId}
-                    />
-                ))}
-            </ul>
-        </div>
+        </ul>
     )
 }
