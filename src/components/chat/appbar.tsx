@@ -31,11 +31,11 @@ function ChatAppBarComponent() {
     return (
         <div className='flex h-14 items-center gap-2 bg-background px-4 shadow'>
             {canGoBack && (
-                <IconButton onMouseDown={() => window.history.back()} icon={<ArrowLeftIcon />} aria-label='back' />
+                <IconButton onPress={() => window.history.back()} icon={<ArrowLeftIcon />} aria-label='back' />
             )}
             {!canGoBack && (
                 <IconButton
-                    onMouseDown={() => navigate('/chats')}
+                    onPress={() => navigate('/chats')}
                     className='shrink-0 md:hidden'
                     icon={<ArrowLeftIcon />}
                     aria-label='back'

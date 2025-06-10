@@ -8,9 +8,25 @@ interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
     'aria-label': string // Ensure accessibility
 }
 
-export function IconButton({ icon, ...props }: IconButtonProps) {
+export function IconButton({ icon, ...props }: IconButtonProps & { onPress?: () => void }) {
     return (
         <button
+            onMouseDown={
+                props.onMouseDown ??
+                ((e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
+                    props.onPress?.()
+                })
+            }
+            onClick={
+                props.onClick ??
+                ((e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
+                    props.onPress?.()
+                })
+            }
             type='button'
             {...props}
             className={cn(
