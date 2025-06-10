@@ -1,6 +1,6 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { memo, Suspense, useRef } from 'react'
+import { memo, Suspense, useEffect, useRef } from 'react'
 import { useParams } from 'react-router'
 import { Center } from '@/components/center'
 import { ChatListTile } from '@/components/chat-list-tile'
@@ -32,6 +32,17 @@ function ChatsListViewContent() {
             refetchOnWindowFocus: true,
         }),
     )
+
+    const queryClient = useQueryClient()
+
+    useEffect(() => {
+        for (const chat of chats) {
+            const existingChat = queryClient.getQueryData(trpc.chat.getChatMessages.queryKey({ chatId: chat.id }))
+            if (!existingChat) {
+                queryClient.prefetchQuery(trpc.chat.getChatMessages.queryOptions({ chatId: chat.id }))
+            }
+        }
+    }, [chats, queryClient, trpc])
 
     const params = useParams()
 

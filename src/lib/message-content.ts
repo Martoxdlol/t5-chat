@@ -32,4 +32,8 @@ export class MessageContent {
     notifySubscribers(content: string): void {
         this.subscribers.forEach((callback) => callback(content))
     }
+
+    toJSON() {
+        return null
+    }
 }
