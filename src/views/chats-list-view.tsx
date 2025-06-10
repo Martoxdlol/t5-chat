@@ -9,6 +9,8 @@ import { useTRPC } from '@/lib/api-client'
 
 export const ChatsListView = memo(ChatsListViewComponent)
 
+const MAX_PREFETCH_CHATS = 10
+
 function ChatsListViewComponent() {
     return (
         <Suspense
@@ -36,11 +38,16 @@ function ChatsListViewContent() {
     const queryClient = useQueryClient()
 
     useEffect(() => {
+        let i = MAX_PREFETCH_CHATS
         for (const chat of chats) {
+            if (i <= 0) {
+                break
+            }
             const existingChat = queryClient.getQueryData(trpc.chat.getChatMessages.queryKey({ chatId: chat.id }))
             if (!existingChat) {
                 queryClient.prefetchQuery(trpc.chat.getChatMessages.queryOptions({ chatId: chat.id }))
             }
+            i--
         }
     }, [chats, queryClient, trpc])
 
