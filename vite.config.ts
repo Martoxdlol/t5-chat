@@ -35,6 +35,12 @@ export default defineConfig({
                 // The rules are processed in order.
                 runtimeCaching: [
                     {
+                        // Rule 0: Don't cache API
+                        urlPattern: /^\/api\//,
+                        // Use NetworkOnly: always fetch from the network for API requests.
+                        handler: 'NetworkOnly',
+                    },
+                    {
                         // Rule 1: Cache the app shell and chat pages
                         // Matches /, /chats, /chats/, /chats/anything
                         urlPattern: /\/($|chats\/.*)/,
@@ -42,7 +48,7 @@ export default defineConfig({
                         // while updating in the background.
                         handler: 'StaleWhileRevalidate',
                         options: {
-                            cacheName: 'app-shell-and-chats',
+                            cacheName: 'app-shell-routes',
                             expiration: {
                                 maxEntries: 50,
                                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 Days
@@ -60,7 +66,7 @@ export default defineConfig({
                             cacheName: 'static-assets',
                             expiration: {
                                 maxEntries: 100,
-                                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 Year
+                                maxAgeSeconds: 60 * 60 * 24, // 1 day
                             },
                         },
                     },
