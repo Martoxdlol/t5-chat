@@ -31,7 +31,9 @@ export function useAuth(): AuthData | null | undefined {
 
         if (!session.isPending && !session.data) {
             // If the session is not pending and there's no data, clear the saved session
-            setSavedSession(null)
+            if (window.navigator.onLine) {
+                setSavedSession(null)
+            }
         }
     }, [session.data, session.isPending, setSavedSession])
 
