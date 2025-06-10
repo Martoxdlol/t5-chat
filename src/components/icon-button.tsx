@@ -8,7 +8,7 @@ interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
     'aria-label': string // Ensure accessibility
 }
 
-export function IconButton({ icon, ...props }: IconButtonProps & { onPress?: () => void }) {
+export function IconButton({ icon, onPress, ...props }: IconButtonProps & { onPress?: () => void }) {
     return (
         <button
             onMouseDown={
@@ -16,7 +16,7 @@ export function IconButton({ icon, ...props }: IconButtonProps & { onPress?: () 
                 ((e) => {
                     e.stopPropagation()
                     e.preventDefault()
-                    props.onPress?.()
+                    onPress?.()
                 })
             }
             onClick={
@@ -24,7 +24,7 @@ export function IconButton({ icon, ...props }: IconButtonProps & { onPress?: () 
                 ((e) => {
                     e.stopPropagation()
                     e.preventDefault()
-                    props.onPress?.()
+                    onPress?.()
                 })
             }
             type='button'
