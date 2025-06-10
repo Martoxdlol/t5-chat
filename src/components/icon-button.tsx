@@ -30,11 +30,11 @@ export function IconButton({ icon, onPress, ...props }: IconButtonProps & { onPr
             type='button'
             {...props}
             className={cn(
-                props.className,
                 'flex size-10 items-center justify-center rounded-full hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
+                props.className,
             )}
         >
-            {cloneElement(icon, { size: 20 })}
+            {cloneElement(icon, { size: 20, ...icon.props })}
         </button>
     )
 }
