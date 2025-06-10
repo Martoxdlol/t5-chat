@@ -7,10 +7,12 @@ export function ChatView(props: { children?: React.ReactNode; input: React.React
             <div className='shrink-0'>
                 <ChatAppBar />
             </div>
-            <div className='min-h-0 shrink grow overflow-y-auto'>
-                <div className='h-fit w-full'>{props.children}</div>
+            <div className='flex min-h-0 shrink grow flex-col bg-primary-foreground'>
+                <div className='min-h-0 shrink grow overflow-y-auto'>
+                    <div className='h-fit w-full'>{props.children}</div>
+                </div>
+                <div className='shrink-0'>{props.input}</div>
             </div>
-            <div className='shrink-0'>{props.input}</div>
         </div>
     )
 }

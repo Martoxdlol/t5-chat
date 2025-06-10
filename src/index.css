@@ -42,70 +42,229 @@
 }
 
 :root {
-    --radius: 0.65rem;
+    color-scheme: dark;
+
     --background: oklch(1 0 0);
-    --foreground: oklch(0.141 0.005 285.823);
+    --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.141 0.005 285.823);
+    --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.141 0.005 285.823);
+    --popover-foreground: oklch(0.145 0 0);
     --primary: oklch(0.6104 0.0934 155.52);
     --primary-foreground: oklch(0.952 0.0132 159.91);
-    --secondary: oklch(0.967 0.001 286.375);
-    --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.967 0.001 286.375);
-    --muted-foreground: oklch(0.552 0.016 285.938);
-    --accent: oklch(0.967 0.001 286.375);
-    --accent-foreground: oklch(0.21 0.006 285.885);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.92 0.004 286.32);
-    --input: oklch(0.92 0.004 286.32);
-    --ring: oklch(0.623 0.214 259.815);
+    --border: oklch(0.708 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);
     --chart-3: oklch(0.398 0.07 227.392);
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.769 0.188 70.08);
+    --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.141 0.005 285.823);
-    --sidebar-primary: oklch(0.623 0.214 259.815);
-    --sidebar-primary-foreground: oklch(0.97 0.014 254.604);
-    --sidebar-accent: oklch(0.967 0.001 286.375);
-    --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-    --sidebar-border: oklch(0.92 0.004 286.32);
-    --sidebar-ring: oklch(0.623 0.214 259.815);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
 }
 
 .dark {
-    --background: oklch(0.141 0.005 285.823);
+    --background: oklch(0.2035 0.0016 197.03);
     --foreground: oklch(0.985 0 0);
-    --card: oklch(0.21 0.006 285.885);
+    --card: oklch(0.205 0 0);
     --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.21 0.006 285.885);
+    --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.546 0.245 262.881);
-    --primary-foreground: oklch(0.379 0.146 265.522);
-    --secondary: oklch(0.274 0.006 286.033);
+    --primary: oklch(0.6104 0.0934 155.52);
+    --primary-foreground: oklch(0.2666 0.0029 196.98);
+    --secondary: oklch(0.269 0 0);
     --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.274 0.006 286.033);
-    --muted-foreground: oklch(0.705 0.015 286.067);
-    --accent: oklch(0.274 0.006 286.033);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
+    --border: oklch(0.2634 0.0015 197.07);
     --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.488 0.243 264.376);
+    --ring: oklch(0.556 0 0);
     --chart-1: oklch(0.488 0.243 264.376);
     --chart-2: oklch(0.696 0.17 162.48);
     --chart-3: oklch(0.769 0.188 70.08);
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.21 0.006 285.885);
+    --sidebar: oklch(0.205 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.546 0.245 262.881);
-    --sidebar-primary-foreground: oklch(0.379 0.146 265.522);
-    --sidebar-accent: oklch(0.274 0.006 286.033);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.488 0.243 264.376);
+    --sidebar-ring: oklch(0.556 0 0);
+}
+
+
+/* src/app/markdown.css */
+
+/*
+ * ===================================================================
+ *  Markdown Content Styles
+ * ===================================================================
+ *  This file styles HTML generated from Markdown.
+ *  It's designed to be used within a container with the class `.markdown-styles`.
+ *  It uses Tailwind's @apply and Shadcn/ui's CSS variables for theming.
+ *  This ensures that the markdown content automatically adapts to your
+ *  light/dark themes and other theme customizations.
+*/
+
+.markdown-styles {
+    /* Base typography */
+    @apply text-base text-foreground leading-relaxed max-w-none;
+}
+
+/* Headings */
+.markdown-styles h1,
+.markdown-styles h2,
+.markdown-styles h3,
+.markdown-styles h4,
+.markdown-styles h5,
+.markdown-styles h6 {
+    @apply font-bold tracking-tight text-foreground;
+}
+
+.markdown-styles h1 {
+    @apply text-4xl mt-8 mb-6 pb-2 border-b;
+    /* border-color: hsl(var(--border)); */
+    border-color: #343535;
+}
+
+.markdown-styles h2 {
+    @apply text-3xl mt-10 mb-5 pb-2 border-b;
+    /* border-color: hsl(var(--border)); */
+    border-color: #343535;
+}
+
+.markdown-styles h3 {
+    @apply text-2xl mt-8 mb-4;
+}
+
+.markdown-styles h4 {
+    @apply text-xl mt-6 mb-3;
+}
+
+/* Paragraphs */
+.markdown-styles p {
+    @apply mb-6;
+}
+
+.markdown-styles p:last-child {
+    @apply mb-0;
+}
+
+
+/* Links */
+.markdown-styles a {
+    @apply font-medium text-primary underline underline-offset-4;
+    text-decoration-skip-ink: auto;
+}
+
+.markdown-styles a:hover {
+    @apply text-primary/80;
+}
+
+/* Lists */
+.markdown-styles ul,
+.markdown-styles ol {
+    @apply my-6 ml-6;
+}
+
+.markdown-styles ul {
+    @apply list-disc;
+}
+
+.markdown-styles ol {
+    @apply list-decimal;
+}
+
+.markdown-styles li {
+    @apply mt-2;
+}
+
+.markdown-styles li>ul,
+.markdown-styles li>ol {
+    @apply mt-2;
+}
+
+/* Blockquotes */
+.markdown-styles blockquote {
+    @apply my-2 mb-4 pl-3 italic border-l-4;
+    color: hsl(var(--muted-foreground));
+    /* border-color: hsl(var(--border)); */
+    border-color: #343535;
+}
+
+.markdown-styles blockquote:first-child {
+    @apply mt-1;
+}
+
+.markdown-styles blockquote:last-child {
+    @apply mb-1;
+}
+
+/* Horizontal Rule */
+.markdown-styles hr {
+    @apply my-8 border-t;
+    border-color: hsl(var(--border));
+}
+
+/* Inline Code */
+.markdown-styles code:not(pre > code) {
+    @apply font-mono text-sm font-medium rounded-md px-1.5 py-1;
+    background-color: hsl(var(--muted));
+    color: hsl(var(--foreground));
+}
+
+/* Images */
+.markdown-styles img {
+    @apply my-6 max-w-full rounded-lg border;
+    /* border-color: hsl(var(--border)); */
+    border-color: #343535;
+}
+
+/* Tables */
+.markdown-styles table {
+    @apply my-6 w-full text-left border-collapse;
+}
+
+.markdown-styles thead {
+    @apply border-b;
+    /* border-color: hsl(var(--border)); */
+    border-color: #343535;
+}
+
+.markdown-styles tr {
+    @apply border-b;
+    /* border-color: hsl(var(--border)); */
+    border-color: #343535;
+}
+
+.markdown-styles tr:last-child {
+    @apply border-b-0;
+}
+
+.markdown-styles th {
+    @apply px-4 py-3 font-semibold text-foreground;
+}
+
+.markdown-styles td {
+    @apply px-4 py-3 text-muted-foreground;
 }

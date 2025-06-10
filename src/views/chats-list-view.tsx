@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { MessageSquarePlusIcon } from 'lucide-react'
-import { Link } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
+import { ChatListTile } from '@/components/chat-list-tile'
+import { IconButton } from '@/components/icon-button'
 import { useTRPC } from '@/lib/api-client'
 
 export function ChatsListView() {
@@ -8,39 +10,29 @@ export function ChatsListView() {
 
     const { data: chats } = useQuery(trpc.chat.listChats.queryOptions())
 
+    const params = useParams()
+
+    const chatId = params.chatId
+
+    const navigate = useNavigate()
+
     return (
-        <div className='flex size-full flex-col'>
+        <div className='flex size-full flex-col bg-background'>
             <div className='flex h-14 shrink-0 items-center justify-between px-4'>
                 <h1 className='font-semibold text-xl'>T5 Chat</h1>
-                <Link
-                    to='/'
-                    type='button'
-                    className='flex size-12 items-center justify-center rounded-full hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50'
-                    title='New chat'
-                >
-                    <MessageSquarePlusIcon />
-                </Link>
+                <IconButton aria-label='Start New Chat' onMouseDown={() => navigate('/')} icon={<MessageSquarePlusIcon />} />
             </div>
             <ul className='flex min-h-0 shrink grow flex-col overflow-y-auto'>
                 {chats?.map((chat) => (
-                    <li key={chat.id} className='block px-2 py-1'>
-                        <Link
-                            to={`/chats/${chat.id}`}
-                            className='flex items-center gap-2 rounded-md p-2 hover:bg-accent'
-                            state={'back-to-home'}
-                        >
-                            <div
-                                className='flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted p-2'
-                                style={{ backgroundColor: chat.color || undefined }}
-                            >
-                                {chat.emoji}
-                            </div>
-                            <div className='min-w-0 shrink grow'>
-                                <p className='w-full overflow-hidden text-ellipsis text-nowrap'>{chat.title}</p>
-                                <p className='w-full overflow-hidden text-ellipsis text-nowrap text-primary text-xs'>{chat.lastMessage}</p>
-                            </div>
-                        </Link>
-                    </li>
+                    <ChatListTile
+                        key={chat.id}
+                        chatId={chat.id}
+                        title={chat.title}
+                        emoji={chat.emoji}
+                        color={chat.color}
+                        lastMessage={chat.lastMessage}
+                        selected={chat.id === chatId}
+                    />
                 ))}
             </ul>
         </div>

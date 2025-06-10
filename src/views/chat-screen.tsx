@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback } from 'react'
+import { Suspense, useCallback } from 'react'
 import { useParams } from 'react-router'
+import { Center } from '@/components/center'
 import { MessageInput } from '@/components/chat/input'
-import { DisplayMessage } from '@/components/chat/message'
+import { ChatMessagesList } from '@/components/chat/messages-list'
+import { Spinner } from '@/components/spinner'
 import { useTRPC } from '@/lib/api-client'
 import { MessageContent } from '@/lib/message-content'
 import type { ChatMessage, Prompt } from '@/lib/types'
@@ -69,9 +71,16 @@ export function ChatScreen() {
 
     return (
         <ChatView input={<MessageInput onPrompt={handlePrompt} />}>
-            {data?.map((msg) => (
-                <DisplayMessage key={msg.index} message={msg} />
-            ))}
+            <Suspense
+                key={chatId}
+                fallback={
+                    <Center>
+                        <Spinner className='my-10' />
+                    </Center>
+                }
+            >
+                <ChatMessagesList chatId={chatId} />
+            </Suspense>
         </ChatView>
     )
 }

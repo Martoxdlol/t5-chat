@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import { ChevronLeftIcon } from 'lucide-react'
-import { useMemo } from 'react'
+import { ArrowLeftIcon, EllipsisVerticalIcon } from 'lucide-react'
+import { memo, useMemo } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { useTRPC } from '@/lib/api-client'
 import { IconButton } from '../icon-button'
 
-export function ChatAppBar() {
+export const ChatAppBar = memo(ChatAppBarComponent)
+
+function ChatAppBarComponent() {
     const location = useLocation()
 
     const params = useParams()
@@ -27,19 +29,20 @@ export function ChatAppBar() {
     const navigate = useNavigate()
 
     return (
-        <div className='flex h-14 items-center gap-2 px-4'>
+        <div className='flex h-14 items-center gap-2 bg-background px-4 shadow'>
             {canGoBack && (
-                <IconButton onClick={() => window.history.back()} icon={<ChevronLeftIcon />} aria-label='back' />
+                <IconButton onMouseDown={() => window.history.back()} icon={<ArrowLeftIcon />} aria-label='back' />
             )}
             {!canGoBack && (
                 <IconButton
-                    onClick={() => navigate('/chats')}
-                    className='md:hidden'
-                    icon={<ChevronLeftIcon />}
+                    onMouseDown={() => navigate('/chats')}
+                    className='shrink-0 md:hidden'
+                    icon={<ArrowLeftIcon />}
                     aria-label='back'
                 />
             )}
-            <h2 className=''>{chatTitle}</h2>
+            <h2 className='min-w-0 shrink grow overflow-hidden text-ellipsis text-nowrap'>{chatTitle}</h2>
+            <IconButton className='shrink-0' icon={<EllipsisVerticalIcon />} aria-label='chat-options' />
         </div>
     )
 }

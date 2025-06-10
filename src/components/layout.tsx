@@ -7,7 +7,7 @@ export function Layout(props: { children: React.ReactNode; sidenav: React.ReactN
         <div className='flex size-full select-none bg-background'>
             <nav
                 className={cn(
-                    'shrink-0 overflow-y-auto border-primary/10 border-r',
+                    'shrink-0 overflow-y-auto border-primary/10 border-r shadow',
                     '6xl:w-md w-full md:w-64 lg:w-sm',
                     {
                         flex: !hasChildren,

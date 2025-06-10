@@ -46,7 +46,7 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
 
     return (
         <div className='p-4 pt-0'>
-            <form className='flex flex-col gap-1 rounded-md border-t-primary/10 bg-primary-foreground p-3' onSubmit={handleSubmit}>
+            <form className='flex flex-col gap-1 rounded-md border-t-primary/10 bg-background/50 p-3 ring-8 ring-primary/10' onSubmit={handleSubmit}>
                 <div className='flex items-start gap-2'>
                     <textarea
                         name='message'

@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/useValidAriaRole: It is not aria role and I don't want to rename its key */
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -84,13 +85,8 @@ export function NewChatScreen() {
         <ChatView input={<MessageInput onPrompt={handlePrompt} />}>
             {optimisticMsg && (
                 <DisplayMessage
-                    message={{
-                        content: optimisticMsg,
-                        createdAt: new Date(),
-                        index: 0,
-                        role: 'user',
-                        status: 'prompted',
-                    }}
+                    content={optimisticMsg}
+                    role='user'
                 />
             )}
         </ChatView>
