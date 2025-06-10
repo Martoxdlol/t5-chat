@@ -1,5 +1,6 @@
 import { LogOutIcon, MessageSquarePlusIcon } from 'lucide-react'
 import { useNavigate } from 'react-router'
+import { AppErrorBoundary } from '@/components/app-error-boundary'
 import { IconButton } from '@/components/icon-button'
 import { authClient } from '@/lib/auth-client'
 import { ChatsListView } from './chats-list-view'
@@ -18,7 +19,9 @@ export function HomeView() {
                     icon={<MessageSquarePlusIcon />}
                 />
             </div>
-            <ChatsListView />
+            <AppErrorBoundary>
+                <ChatsListView />
+            </AppErrorBoundary>
         </div>
     )
 }

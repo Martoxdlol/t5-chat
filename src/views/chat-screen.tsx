@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback } from 'react'
 import { useParams } from 'react-router'
+import { AppErrorBoundary } from '@/components/app-error-boundary'
 import { Center } from '@/components/center'
 import { MessageInput } from '@/components/chat/input'
 import { ChatMessagesList } from '@/components/chat/messages-list'
@@ -106,7 +107,9 @@ export function ChatScreen() {
                     </Center>
                 }
             >
-                <ChatMessagesList chatId={chatId} />
+                <AppErrorBoundary>
+                    <ChatMessagesList chatId={chatId} />
+                </AppErrorBoundary>
             </Suspense>
         </ChatView>
     )
