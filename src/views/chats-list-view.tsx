@@ -21,8 +21,16 @@ export function ChatsListView() {
         <div className='flex size-full flex-col bg-background'>
             <div className='flex h-14 shrink-0 items-center gap-1 px-4'>
                 <h1 className='grow font-semibold text-xl'>T5 Chat</h1>
-                <IconButton aria-label='Start New Chat' onMouseDown={() => authClient.signOut()} icon={<LogOutIcon />} />
-                <IconButton aria-label='Start New Chat' onMouseDown={() => navigate('/')} icon={<MessageSquarePlusIcon />} />
+                <IconButton
+                    aria-label='Start New Chat'
+                    onMouseDown={() => authClient.signOut()}
+                    icon={<LogOutIcon />}
+                />
+                <IconButton
+                    aria-label='Start New Chat'
+                    onMouseDown={() => navigate('/')}
+                    icon={<MessageSquarePlusIcon />}
+                />
             </div>
             <ul className='flex min-h-0 shrink grow flex-col overflow-y-auto'>
                 {chats?.map((chat) => (

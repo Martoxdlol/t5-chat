@@ -28,10 +28,7 @@ export function RenderMarkdown(props: { code: string }) {
                         const { children, className, ...rest } = props
                         const match = /language-(\w+)/.exec(className || '')
                         return match ? (
-                            <CodeBlockMemo
-                                code={String(children).replace(/\n$/, '')}
-                                lang={match[1]}
-                            />
+                            <CodeBlockMemo code={String(children).replace(/\n$/, '')} lang={match[1]} />
                         ) : (
                             <code {...rest} className={className}>
                                 {children}

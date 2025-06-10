@@ -27,11 +27,11 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
 
     const handleSubmit = useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
-            e.preventDefault();
+            e.preventDefault()
             const formData = new FormData(e.currentTarget)
-            const text = formData.get('message')?.toString().trim() || '';
+            const text = formData.get('message')?.toString().trim() || ''
 
-            (e.target as HTMLFormElement).reset()
+            ;(e.target as HTMLFormElement).reset()
 
             if (text.length === 0) {
                 return
@@ -49,17 +49,19 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
 
     const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-            e.preventDefault();
+            e.preventDefault()
             const button = submitButtonRef.current
             button!.click()
             return
         }
     }, [])
 
-
     return (
         <div className='p-4 pt-0'>
-            <form className='flex flex-col gap-1 rounded-md border-t-primary/10 bg-background/50 p-3 ring-8 ring-primary/10' onSubmit={handleSubmit}>
+            <form
+                className='flex flex-col gap-1 rounded-md border-t-primary/10 bg-background/50 p-3 ring-8 ring-primary/10'
+                onSubmit={handleSubmit}
+            >
                 <div className='flex items-start gap-2'>
                     <textarea
                         name='message'
@@ -74,7 +76,9 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
                     </Button>
                 </div>
                 <div className='flex items-center gap-2'>
-                    <Button className='h-6' size='sm'>o3-mini</Button>
+                    <Button className='h-6' size='sm'>
+                        o3-mini
+                    </Button>
                 </div>
             </form>
         </div>

@@ -8,9 +8,7 @@ export function ChatView(props: { children?: React.ReactNode; input: React.React
                 <ChatAppBar />
             </div>
             <div className='flex min-h-0 shrink grow flex-col bg-primary-foreground'>
-                <div className='relative flex min-h-0 shrink grow flex-col'>
-                    {props.children}
-                </div>
+                <div className='relative flex min-h-0 shrink grow flex-col'>{props.children}</div>
                 <div className='shrink-0'>{props.input}</div>
             </div>
         </div>

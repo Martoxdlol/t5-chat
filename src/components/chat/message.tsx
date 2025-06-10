@@ -41,19 +41,25 @@ function DisplayMessageComponent(props: Pick<ChatMessage, 'content' | 'role' | '
         )
     }
 
-    const generationFailed = message.status === 'failed' || message.status === 'generating' && !message.contentManager
+    const generationFailed = message.status === 'failed' || (message.status === 'generating' && !message.contentManager)
 
     if (message.role === 'assistant') {
         return (
             <div className='min-h-[calc(var(--screen-height)_-_176px)] px-4 py-3 last:pb-6 md:px-10'>
-                {!generationFailed && <>{content ? <RenderMarkdown code={content} /> : <p className='flex items-center gap-2 font-semibold text-sm'>
-                    <Loader className='animate-spin' />
-                    Generating
-                </p>}</>}
+                {!generationFailed && (
+                    <>
+                        {content ? (
+                            <RenderMarkdown code={content} />
+                        ) : (
+                            <p className='flex items-center gap-2 font-semibold text-sm'>
+                                <Loader className='animate-spin' />
+                                Generating
+                            </p>
+                        )}
+                    </>
+                )}
                 {generationFailed && (
-                    <p className='font-semibold text-red-500 text-sm'>
-                        Generation failed. Please try again.
-                    </p>
+                    <p className='font-semibold text-red-500 text-sm'>Generation failed. Please try again.</p>
                 )}
             </div>
         )

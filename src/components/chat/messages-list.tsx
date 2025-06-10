@@ -26,9 +26,7 @@ function ChatMessagesListComponent(props: { chatId: string }) {
     }, [data.length, containerRef.current])
 
     return (
-        <div className='size-full overflow-y-auto'
-            ref={containerRef}
-        >
+        <div className='size-full overflow-y-auto' ref={containerRef}>
             <div className='h-fit w-full'>
                 {data?.map((msg) => (
                     <DisplayMessage

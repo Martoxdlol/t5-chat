@@ -37,19 +37,13 @@ export function ChatScreen() {
                 status: 'prompted',
                 content: '',
                 createdAt: new Date(),
-
             }
-
 
             queryClient.setQueryData(
                 trpc.chat.getChatMessages.queryKey({ chatId }),
                 (data) => {
                     const prev = data ?? []
-                    return [
-                        ...prev,
-                        userMsgPending,
-                        responseMsgPending,
-                    ]
+                    return [...prev, userMsgPending, responseMsgPending]
                 },
                 {
                     updatedAt: Date.now(),
@@ -89,7 +83,7 @@ export function ChatScreen() {
                     queryClient.setQueryData(
                         trpc.chat.getChatMessages.queryKey({ chatId }),
                         (data) => {
-                            const msgs = (data?.slice(0, -2) ?? [])
+                            const msgs = data?.slice(0, -2) ?? []
                             msgs.push(userMsg, responseMsg)
                             return msgs
                         },

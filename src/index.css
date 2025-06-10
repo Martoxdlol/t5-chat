@@ -112,7 +112,6 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
-
 /* src/app/markdown.css */
 
 /*
@@ -170,7 +169,6 @@
     @apply mb-0;
 }
 
-
 /* Links */
 .markdown-styles a {
     @apply font-medium text-primary underline underline-offset-4;
@@ -199,8 +197,8 @@
     @apply mt-2;
 }
 
-.markdown-styles li>ul,
-.markdown-styles li>ol {
+.markdown-styles li > ul,
+.markdown-styles li > ol {
     @apply mt-2;
 }
 
