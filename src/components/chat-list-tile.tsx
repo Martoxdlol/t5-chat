@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { cn } from '@/lib/utils'
 
 export const ChatListTile = memo(ChatListTileComponent)
@@ -13,7 +13,7 @@ function ChatListTileComponent(props: {
     selected?: boolean
     style?: React.CSSProperties
 }) {
-    const navigate = useNavigate()
+    // const navigate = useNavigate()
 
     return (
         <li className='flex shrink-0 items-center overflow-hidden px-2 py-1' style={props.style}>
@@ -26,13 +26,13 @@ function ChatListTileComponent(props: {
                 //         state: 'back-to-home',
                 //     })
                 // }}
-                onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    navigate(e.currentTarget.pathname, {
-                        state: 'back-to-home',
-                    })
-                }}
+                // onClick={(e) => {
+                //     e.preventDefault()
+                //     e.stopPropagation()
+                //     navigate(e.currentTarget.pathname, {
+                //         state: 'back-to-home',
+                //     })
+                // }}
                 to={`/chats/${props.chatId}`}
                 className={cn('flex w-full items-center gap-2 rounded-lg p-2 hover:bg-accent', {
                     'bg-accent': props.selected,
