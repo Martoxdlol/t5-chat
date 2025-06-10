@@ -22,6 +22,7 @@ export default defineConfig({
                 description: 'A ai chat application (t3.chat inspired)',
                 theme_color: '#51946B',
                 background_color: '#161717',
+                display: 'standalone',
                 icons: [
                     {
                         src: '/icon.png',
