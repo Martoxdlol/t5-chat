@@ -18,13 +18,14 @@ function ChatListTileComponent(props: {
     return (
         <li className='flex shrink-0 items-center overflow-hidden px-2 py-1' style={props.style}>
             <Link
-                onMouseDown={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    navigate(e.currentTarget.pathname, {
-                        state: 'back-to-home',
-                    })
-                }}
+                // TODO: Review logic
+                // onMouseDown={(e) => {
+                //     e.preventDefault()
+                //     e.stopPropagation()
+                //     navigate(e.currentTarget.pathname, {
+                //         state: 'back-to-home',
+                //     })
+                // }}
                 onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
