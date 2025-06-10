@@ -65,9 +65,12 @@ if (!self.define) {
         )
     }
 }
-define(['./workbox-86c9b217'], function (workbox) {
+define(['./workbox-68b3eb15'], function (workbox) {
     'use strict'
 
+    workbox.setCacheNameDetails({
+        prefix: 't5-chat-v2',
+    })
     self.skipWaiting()
     workbox.clientsClaim()
 
@@ -84,7 +87,7 @@ define(['./workbox-86c9b217'], function (workbox) {
             },
             {
                 url: 'index.html',
-                revision: '0.ckr4fsf0ifk',
+                revision: '0.egbkaoq4l9',
             },
         ],
         {},
@@ -95,4 +98,32 @@ define(['./workbox-86c9b217'], function (workbox) {
             allowlist: [/^\/$/],
         }),
     )
+    workbox.registerRoute(/^\/api\//, new workbox.NetworkOnly(), 'GET')
+    workbox.registerRoute(
+        /\/($|chats\/.*)/,
+        new workbox.StaleWhileRevalidate({
+            cacheName: 'app-shell-routes',
+            plugins: [
+                new workbox.ExpirationPlugin({
+                    maxEntries: 50,
+                    maxAgeSeconds: 2592000,
+                }),
+            ],
+        }),
+        'GET',
+    )
+    workbox.registerRoute(
+        /\.(?:js|css|ico|png|svg|jpg|jpeg|woff|woff2)$/,
+        new workbox.CacheFirst({
+            cacheName: 'static-assets',
+            plugins: [
+                new workbox.ExpirationPlugin({
+                    maxEntries: 100,
+                    maxAgeSeconds: 86400,
+                }),
+            ],
+        }),
+        'GET',
+    )
+    workbox.registerRoute(/^https?.*/, new workbox.NetworkOnly(), 'GET')
 })
