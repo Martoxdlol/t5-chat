@@ -3,10 +3,33 @@ import reactScan from '@react-scan/vite-plugin-react-scan'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
-    plugins: [react(), reactScan(), tailwindcss()],
+    plugins: [
+        react(),
+        reactScan(),
+        tailwindcss(),
+        VitePWA({
+            registerType: 'autoUpdate',
+            devOptions: {
+                enabled: true,
+            },
+            manifest: {
+                name: 'T5 Chat',
+                short_name: 'T5 Chat',
+                description: 'A ai chat application (t3.chat inspired)',
+                theme_color: '#51946B',
+                background_color: '#161717',
+                icons: [
+                    {
+                        src: '/icon.png',
+                    },
+                ],
+            },
+        }) as any,
+    ],
     build: {
         outDir: 'dist/app',
     },
