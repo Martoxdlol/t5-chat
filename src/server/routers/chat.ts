@@ -1,3 +1,4 @@
+import { TRPCError } from '@trpc/server'
 import { and, desc, eq, sql } from 'drizzle-orm'
 import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
@@ -10,6 +11,8 @@ import {
     generateMessage,
     getChatMessages,
 } from '../service/chat'
+import { ensureCompletionAsyncGenerator } from '../service/map-generator'
+import { getDefaultCheapModel } from '../service/models'
 import { protectedProcedure, router } from '../trpc'
 
 export const chatRouter = router({
@@ -57,6 +60,12 @@ export const chatRouter = router({
             const createdAt = new Date()
             const chatTitle = 'New Chat'
 
+            const cheapModel = getDefaultCheapModel(ctx.models).instance
+
+            const expensiveModel = ctx.models.get(input.prompt.model)
+
+            const model = expensiveModel?.instance || cheapModel
+
             await ctx.db.transaction(async (tx) => {
                 await tx.insert(schema.chats).values({
                     id: chatId,
@@ -102,6 +111,22 @@ export const chatRouter = router({
                     )
             }
 
+            async function handlePartial(text: string) {
+                await ctx.db
+                    .update(schema.messages)
+                    .set({
+                        content: text,
+                    })
+                    .where(
+                        and(
+                            eq(schema.messages.userId, ctx.user.id),
+                            eq(schema.messages.chatId, chatId),
+                            eq(schema.messages.index, 1),
+                            eq(schema.messages.status, 'generating'),
+                        ),
+                    )
+            }
+
             function updateTitle(newTitle: string) {
                 return ctx.db
                     .update(schema.chats)
@@ -131,37 +156,41 @@ export const chatRouter = router({
             return {
                 id: chatId,
                 title: chatTitle,
-                titleGenerator: generateChatTitle(sanitizedPrompt).then((title) => {
+                titleGenerator: generateChatTitle(cheapModel, sanitizedPrompt).then((title) => {
                     updateTitle(title).catch((error) => {
                         console.error('Error updating chat title:', error)
                     })
                     return title
                 }),
-                colorGenerator: generateChatColor(sanitizedPrompt).then((color) => {
+                colorGenerator: generateChatColor(cheapModel, sanitizedPrompt).then((color) => {
                     updateColor(color).catch((error) => {
                         console.error('Error updating chat color:', error)
                     })
                     return color
                 }),
-                emojiGenerator: generateChatEmoji(sanitizedPrompt).then((emoji) => {
+                emojiGenerator: generateChatEmoji(cheapModel, sanitizedPrompt).then((emoji) => {
                     updateEmoji(emoji).catch((error) => {
                         console.error('Error updating chat emoji:', error)
                     })
                     return emoji
                 }),
                 createdAt: createdAt,
-                firstResponseGenerator: generateMessage(
-                    [
-                        {
-                            content: input.prompt.text,
-                            index: 0,
-                            role: 'user',
-                            status: 'generating',
-                            createdAt: createdAt,
-                        },
-                    ],
-                    input.prompt.model,
-                    handleFinish,
+                firstResponseGenerator: ensureCompletionAsyncGenerator(
+                    generateMessage(
+                        model,
+                        [
+                            {
+                                content: input.prompt.text,
+                                index: 0,
+                                role: 'user',
+                                status: 'generating',
+                                createdAt: createdAt,
+                            },
+                        ],
+                        input.prompt.model,
+                        handleFinish,
+                        handlePartial,
+                    ),
                 ),
             }
         }),
@@ -176,6 +205,33 @@ export const chatRouter = router({
             return await getChatMessages(ctx.db, ctx.user.id, input.chatId)
         }),
 
+    getMessage: protectedProcedure
+        .input(
+            z.object({
+                chatId: z.string(),
+                index: z.number(),
+            }),
+        )
+        .query(async ({ ctx, input }) => {
+            const r = await ctx.db
+                .select({
+                    index: schema.messages.index,
+                    role: schema.messages.role,
+                    status: schema.messages.status,
+                    content: schema.messages.content,
+                    createdAt: schema.messages.createdAt,
+                })
+                .from(schema.messages)
+                .where(
+                    and(
+                        eq(schema.messages.userId, ctx.user.id),
+                        eq(schema.messages.chatId, input.chatId),
+                        eq(schema.messages.index, input.index),
+                    ),
+                )
+            return r[0] ?? null
+        }),
+
     prompt: protectedProcedure
         .input(
             z.object({
@@ -184,9 +240,33 @@ export const chatRouter = router({
             }),
         )
         .mutation(async ({ ctx, input }) => {
+            const cheapModel = getDefaultCheapModel(ctx.models).instance
+
+            const expensiveModel = ctx.models.get(input.prompt.model)
+
+            const model = expensiveModel?.instance || cheapModel
+
+            const cost = expensiveModel?.cost || 1
+
             const { messages, userMessageIndex, responseMessageIndex } = await ctx.db
                 .transaction(async (tx) => {
-                    const messages = await getChatMessages(tx, ctx.user.id, input.chatId)
+                    const [messages, user] = await Promise.all([
+                        getChatMessages(tx, ctx.user.id, input.chatId),
+                        tx
+                            .select({
+                                credits: schema.user.credits,
+                            })
+                            .from(schema.user)
+                            .where(eq(schema.user.id, ctx.user.id)),
+                    ])
+
+                    if (user[0]!.credits < cost * messages.length) {
+                        throw new TRPCError({
+                            code: 'PAYMENT_REQUIRED',
+                            message: 'Not enough credits to generate a response',
+                        })
+                    }
+
                     const lastIndex = Math.max(...messages.map((msg) => msg.index), -1)
                     const userMessageIndex = lastIndex + 1
                     const responseMessageIndex = userMessageIndex + 1
@@ -197,7 +277,7 @@ export const chatRouter = router({
                         }
                     }
 
-                    await tx.insert(schema.messages).values({
+                    const insertMsg1 = tx.insert(schema.messages).values({
                         userId: ctx.user.id,
                         chatId: input.chatId,
                         role: 'user',
@@ -207,7 +287,7 @@ export const chatRouter = router({
                         createdAt: new Date(),
                     })
 
-                    await tx.insert(schema.messages).values({
+                    const insertMsg2 = tx.insert(schema.messages).values({
                         userId: ctx.user.id,
                         chatId: input.chatId,
                         role: 'assistant',
@@ -216,6 +296,8 @@ export const chatRouter = router({
                         content: '',
                         createdAt: new Date(),
                     })
+
+                    await Promise.all([insertMsg1, insertMsg2])
 
                     return {
                         messages: [
@@ -253,10 +335,34 @@ export const chatRouter = router({
                             eq(schema.messages.index, responseMessageIndex),
                         ),
                     )
+
+                await ctx.db.update(schema.user).set({
+                    credits: sql`${schema.user.credits} - ${cost * messages.length}`,
+                })
             }
 
+            async function handlePartial(text: string) {
+                await ctx.db
+                    .update(schema.messages)
+                    .set({
+                        content: text,
+                    })
+                    .where(
+                        and(
+                            eq(schema.messages.userId, ctx.user.id),
+                            eq(schema.messages.chatId, input.chatId),
+                            eq(schema.messages.index, responseMessageIndex),
+                            eq(schema.messages.status, 'generating'),
+                        ),
+                    )
+            }
+
+            const generator = ensureCompletionAsyncGenerator(
+                generateMessage(model, messages, input.prompt.model, handleFinish, handlePartial),
+            )
+
             return {
-                generator: generateMessage(messages, input.prompt.model, handleFinish),
+                generator,
                 userMessageIndex,
                 responseMessageIndex,
             }

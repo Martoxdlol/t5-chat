@@ -1,7 +1,11 @@
-import { SendHorizontal } from 'lucide-react'
-import { memo, useCallback, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { Loader2Icon, SendHorizontal } from 'lucide-react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useLocalStorageState } from '@/hooks/use-local-storage-state'
+import { useTRPC } from '@/lib/api-client'
 import type { Prompt } from '@/lib/types'
 import { Button } from '../ui/button'
+import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../ui/dialog'
 
 const MIN_ROWS = 1
 const MAX_ROWS = 10
@@ -10,6 +14,8 @@ export const MessageInput = memo(MessageInputComponent)
 
 function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
     const [rows, setRows] = useState(MIN_ROWS)
+
+    const [model, setModel] = useLocalStorageState<string | null>('model', () => null)
 
     const handleOnChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
         let rows = 1
@@ -39,10 +45,10 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
 
             props.onPrompt?.({
                 text,
-                model: 'TODO:implement-model-selection',
+                model: model || 'default',
             })
         },
-        [props.onPrompt],
+        [props.onPrompt, model],
     )
 
     const submitButtonRef = useRef<HTMLButtonElement>(null)
@@ -76,11 +82,76 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
                     </Button>
                 </div>
                 <div className='flex items-center gap-2'>
-                    <Button className='h-6' size='sm'>
-                        o3-mini
-                    </Button>
+                    <ModelsSelect model={model} setModel={setModel} />
                 </div>
             </form>
         </div>
+    )
+}
+
+const ModelsSelect = memo(ModelsSelectComponent)
+
+function ModelsSelectComponent(props: { model?: string | null; setModel: (model: string) => void }) {
+    const trpc = useTRPC()
+
+    const model = props.model
+    const setModel = props.setModel
+
+    const { data: models } = useQuery(trpc.models.queryOptions())
+
+    const selectedModel = useMemo(() => {
+        if (model) {
+            const selectedModel = models?.models.find((m) => m.id === model)
+            if (!selectedModel && models) {
+                return models?.models.find((m) => m.id === models.defaultModel)
+            }
+            return selectedModel
+        }
+        if (models?.defaultModel) {
+            return models?.models.find((m) => m.id === models.defaultModel)
+        }
+        return undefined
+    }, [model, models])
+
+    // biome-ignore lint/correctness/useExhaustiveDependencies: Won't change
+    useEffect(() => {
+        if (selectedModel && !model) {
+            setModel(selectedModel.id)
+        }
+    }, [selectedModel, model])
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button className='h-6' size='sm'>
+                    {selectedModel?.name ?? <Loader2Icon className='animate-spin' size={18} />}
+                </Button>
+            </DialogTrigger>
+            <DialogContent className='max-h-[var(--screen-height)] overflow-y-auto'>
+                <ModelsSelectDialog
+                    models={models?.models || []}
+                    onSelect={(modelId) => {
+                        setModel(modelId)
+                    }}
+                />
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+const ModelsSelectDialog = memo(ModelsSelectDialogListComponent)
+
+function ModelsSelectDialogListComponent(props: {
+    models: { id: string; name: string }[]
+    onSelect: (modelId: string) => void
+}) {
+    return (
+        <>
+            {props.models?.map((model) => (
+                <DialogClose value={model.id} key={model.id} onClick={() => props.onSelect(model.id)} asChild>
+                    <Button variant='ghost'>{model.name}</Button>
+                </DialogClose>
+            ))}
+        </>
     )
 }

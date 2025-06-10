@@ -7,7 +7,9 @@ import { RenderMarkdown } from './markdown'
 
 export const DisplayMessage = memo(DisplayMessageComponent)
 
-function DisplayMessageComponent(props: Pick<ChatMessage, 'content' | 'role' | 'contentManager' | 'status'>) {
+function DisplayMessageComponent(
+    props: Pick<ChatMessage, 'content' | 'role' | 'contentManager' | 'status'> & { onPoll?: () => void },
+) {
     const message = props
     // Assuming 'role' determines if the message is from the user or another party (e.g., 'assistant', 'bot').
     // Adjust 'user' to match the actual role identifier for messages sent by the current user.
@@ -27,6 +29,26 @@ function DisplayMessageComponent(props: Pick<ChatMessage, 'content' | 'role' | '
 
     const content = (generated ?? message.content).trim()
 
+    const generationFailed = message.status === 'failed'
+
+    const stuckGenerating = !generationFailed && message.status === 'generating' && !message.contentManager
+
+    useEffect(() => {
+        if (!props.onPoll) {
+            return
+        }
+
+        if (stuckGenerating) {
+            const timer = window.setInterval(() => {
+                props.onPoll?.()
+            }, 1000)
+
+            return () => {
+                window.clearInterval(timer)
+            }
+        }
+    }, [stuckGenerating, props.onPoll])
+
     if (isUserMessage) {
         return (
             <div
@@ -41,12 +63,10 @@ function DisplayMessageComponent(props: Pick<ChatMessage, 'content' | 'role' | '
         )
     }
 
-    const generationFailed = message.status === 'failed' || (message.status === 'generating' && !message.contentManager)
-
     if (message.role === 'assistant') {
         return (
-            <div className='last:min-h-[calc(var(--screen-height)_-_176px)] px-4 py-3 last:pb-6 md:px-10'>
-                {!generationFailed &&
+            <div className='px-4 py-3 last:min-h-[calc(var(--screen-height)_-_176px)] last:pb-6 md:px-10'>
+                {(!generationFailed || stuckGenerating) &&
                     (content ? (
                         <RenderMarkdown code={content} />
                     ) : (

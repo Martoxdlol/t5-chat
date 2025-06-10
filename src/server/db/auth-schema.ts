@@ -1,4 +1,4 @@
-import { boolean, mysqlTable, text, timestamp, varchar } from 'drizzle-orm/mysql-core'
+import { boolean, int, mysqlTable, text, timestamp, varchar } from 'drizzle-orm/mysql-core'
 
 export const user = mysqlTable('user', {
     id: varchar('id', { length: 36 }).primaryKey(),
@@ -14,6 +14,7 @@ export const user = mysqlTable('user', {
     updatedAt: timestamp('updated_at')
         .$defaultFn(() => /* @__PURE__ */ new Date())
         .notNull(),
+    credits: int('credits').default(200).notNull(),
 })
 
 export const session = mysqlTable('session', {

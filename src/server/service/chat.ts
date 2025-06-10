@@ -1,5 +1,4 @@
-import { openai } from '@ai-sdk/openai'
-import { streamText } from 'ai'
+import { type LanguageModelV1, streamText } from 'ai'
 import { and, asc, eq } from 'drizzle-orm'
 import type { ChatMessage } from '@/lib/types'
 import { type DBTX, schema } from '../db'
@@ -19,12 +18,14 @@ export async function getChatMessages(db: DBTX, userId: string, chatId: string):
 }
 
 export async function* generateMessage(
+    model: LanguageModelV1,
     messages: ChatMessage[],
     _model: string,
     onFinish: (text: string) => void,
+    onPartial?: (text: string) => void,
 ): AsyncGenerator<string> {
     const result = streamText({
-        model: openai('gpt-4o-mini'),
+        model,
         system: 'You are a helpful assistant that generates responses based on user messages. You output markdown formatted text with support for code blocks, math equations, and other markdown features. Use $$ for any math expression and symbols. Ensure all math is wrapped correctly.',
         messages: messages.map((msg) => ({
             content: msg.content,
@@ -35,23 +36,37 @@ export async function* generateMessage(
         },
     })
 
+    let lastPartial = Date.now()
+    let partialText = ''
+
     for await (const chunk of result.textStream) {
+        partialText += chunk
+
+        if (onPartial) {
+            const now = Date.now()
+            if (now - lastPartial > 1000) {
+                // Throttle partial updates to every second
+                onPartial(partialText)
+                lastPartial = now
+            }
+        }
+
         yield chunk
     }
 }
 
-export async function generateChatTitle(firstPrompt: string): Promise<string> {
+export async function generateChatTitle(model: LanguageModelV1, firstPrompt: string): Promise<string> {
     const result = streamText({
         onError: (error) => {
             console.error('Error generating chat title:', error)
         },
-        model: openai('o3-mini'),
+        model,
         maxTokens: 600,
         messages: [
             {
                 role: 'system',
                 content:
-                    'You are instructed to generate chat titles based on the content of the first message. The title must be concise and it must summarize the topic of the conversation.',
+                    'You are instructed to generate chat titles based on the content of the first message. The title must be concise and it must summarize the topic of the conversation. You must output only the title, without any additional text or characters.',
             },
             { role: 'user', content: firstPrompt },
         ],
@@ -65,12 +80,12 @@ export async function generateChatTitle(firstPrompt: string): Promise<string> {
     return title.trim() || 'Unnamed Chat'
 }
 
-export async function generateChatColor(firstPrompt: string): Promise<string> {
+export async function generateChatColor(model: LanguageModelV1, firstPrompt: string): Promise<string> {
     const result = streamText({
         onError: (error) => {
-            console.error('Error generating chat title:', error)
+            console.error('Error generating chat color:', error)
         },
-        model: openai('o3-mini'),
+        model,
         maxTokens: 600,
         messages: [
             {
@@ -90,12 +105,12 @@ export async function generateChatColor(firstPrompt: string): Promise<string> {
     return color.trim() || '#FFFFFF' // Default to white if no color is generated
 }
 
-export async function generateChatEmoji(firstPrompt: string): Promise<string> {
+export async function generateChatEmoji(model: LanguageModelV1, firstPrompt: string): Promise<string> {
     const result = streamText({
         onError: (error) => {
-            console.error('Error generating chat title:', error)
+            console.error('Error generating chat emoji:', error)
         },
-        model: openai('o3-mini'),
+        model,
         maxTokens: 600,
         messages: [
             {
