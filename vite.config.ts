@@ -29,17 +29,7 @@ export default defineConfig({
                 ],
             },
             workbox: {
-                runtimeCaching: [
-                    {
-                        urlPattern: ({ url }) => url.pathname.startsWith('/api'),
-                        handler: 'NetworkOnly',
-                        options: {
-                            networkTimeoutSeconds: 10, // Optional: timeout for network requests
-                        },
-                    },
-                ],
-                // If you also want to ensure API calls are not used for navigation fallback
-                navigateFallbackDenylist: [/^\/api/],
+                globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
             },
         }) as any,
     ],
