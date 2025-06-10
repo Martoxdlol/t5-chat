@@ -30,6 +30,7 @@ export default defineConfig({
                 ],
             },
             workbox: {
+                navigateFallbackAllowlist: [/^\/chats/, /^\/$/],
                 cacheId: 't5-chat-v2',
                 // This is where we define our caching strategies.
                 // The rules are processed in order.

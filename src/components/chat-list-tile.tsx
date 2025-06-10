@@ -33,7 +33,7 @@ function ChatListTileComponent(props: {
                     })
                 }}
                 to={`/chats/${props.chatId}`}
-                className={cn('flex items-center gap-2 rounded-lg p-2 hover:bg-accent', {
+                className={cn('flex w-full items-center gap-2 rounded-lg p-2 hover:bg-accent', {
                     'bg-accent': props.selected,
                 })}
                 state={'back-to-home'}
