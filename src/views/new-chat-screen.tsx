@@ -2,6 +2,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { Center } from '@/components/center'
 import { MessageInput } from '@/components/chat/input'
 import { DisplayMessage } from '@/components/chat/message'
 import { useTRPC } from '@/lib/api-client'
@@ -83,12 +84,10 @@ export function NewChatScreen() {
 
     return (
         <ChatView input={<MessageInput onPrompt={handlePrompt} />}>
-            {optimisticMsg && (
-                <DisplayMessage
-                    content={optimisticMsg}
-                    role='user'
-                />
-            )}
+            {optimisticMsg && <DisplayMessage content={optimisticMsg} role='user' status='prompted' />}
+            {!optimisticMsg && <Center>
+                <p className='text-2xl text-primary'>Send a message to start a conversation</p>
+            </Center>}
         </ChatView>
     )
 }

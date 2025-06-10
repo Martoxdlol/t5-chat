@@ -1,5 +1,5 @@
 import { SendHorizontal } from 'lucide-react'
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useRef, useState } from 'react'
 import type { Prompt } from '@/lib/types'
 import { Button } from '../ui/button'
 
@@ -27,9 +27,11 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
 
     const handleSubmit = useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
-            e.preventDefault()
+            e.preventDefault();
             const formData = new FormData(e.currentTarget)
-            const text = formData.get('message')?.toString().trim() || ''
+            const text = formData.get('message')?.toString().trim() || '';
+
+            (e.target as HTMLFormElement).reset()
 
             if (text.length === 0) {
                 return
@@ -43,6 +45,17 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
         [props.onPrompt],
     )
 
+    const submitButtonRef = useRef<HTMLButtonElement>(null)
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            const button = submitButtonRef.current
+            button!.click()
+            return
+        }
+    }, [])
+
 
     return (
         <div className='p-4 pt-0'>
@@ -54,8 +67,9 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
                         placeholder='Type your message here...'
                         rows={rows}
                         onChange={handleOnChange}
+                        onKeyDown={handleKeyDown}
                     />
-                    <Button type='submit' size='icon'>
+                    <Button type='submit' size='icon' ref={submitButtonRef}>
                         <SendHorizontal />
                     </Button>
                 </div>

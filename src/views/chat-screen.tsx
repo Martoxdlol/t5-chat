@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Suspense, useCallback } from 'react'
 import { useParams } from 'react-router'
 import { Center } from '@/components/center'
@@ -17,14 +17,45 @@ export function ChatScreen() {
 
     const trpc = useTRPC()
 
-    const { data } = useQuery(trpc.chat.getChatMessages.queryOptions({ chatId }, { staleTime: 1000 * 60 * 5 }))
-
     const promptMutation = useMutation(trpc.chat.prompt.mutationOptions())
 
     const queryClient = useQueryClient()
 
     const handlePrompt = useCallback(
         (prompt: Prompt) => {
+            const userMsgPending: ChatMessage = {
+                index: 100001,
+                role: 'user',
+                status: 'prompted',
+                content: prompt.text,
+                createdAt: new Date(),
+            }
+
+            const responseMsgPending: ChatMessage = {
+                index: 100002,
+                role: 'assistant',
+                status: 'prompted',
+                content: '',
+                createdAt: new Date(),
+
+            }
+
+
+            queryClient.setQueryData(
+                trpc.chat.getChatMessages.queryKey({ chatId }),
+                (data) => {
+                    const prev = data ?? []
+                    return [
+                        ...prev,
+                        userMsgPending,
+                        responseMsgPending,
+                    ]
+                },
+                {
+                    updatedAt: Date.now(),
+                },
+            )
+
             promptMutation
                 .mutateAsync({
                     chatId,
@@ -58,7 +89,9 @@ export function ChatScreen() {
                     queryClient.setQueryData(
                         trpc.chat.getChatMessages.queryKey({ chatId }),
                         (data) => {
-                            return [...(data || []), userMsg, responseMsg] as ChatMessage[]
+                            const msgs = (data?.slice(0, -2) ?? [])
+                            msgs.push(userMsg, responseMsg)
+                            return msgs
                         },
                         {
                             updatedAt: Date.now(),

@@ -43,7 +43,6 @@ export const chatRouter = router({
                     console.error('Error fetching chats:', error)
                     throw new Error('Failed to fetch chats')
                 })
-            console.log(chats)
             return chats
         }),
 
