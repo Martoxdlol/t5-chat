@@ -15,6 +15,8 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void; pla
 
     const [model, setModel] = useLocalStorageState<string | null>('model', () => null)
 
+    const [defaultValue] = useState<string>(() => localStorage.getItem('last_written_message') || '')
+
     const handleOnChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
         let rows = 1
         for (let i = 0; i < e.target.value.length; i++) {
@@ -26,20 +28,29 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void; pla
             }
         }
 
+        localStorage.setItem('last_written_message', e.target.value)
+
         setRows(Math.max(rows, MIN_ROWS))
     }, [])
 
     const handleSubmit = useCallback(
         (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault()
+
+            if (!props.onPrompt) {
+                return
+            }
+
             const formData = new FormData(e.currentTarget)
             const text = formData.get('message')?.toString().trim() || ''
-
-            ;(e.target as HTMLFormElement).reset()
 
             if (text.length === 0) {
                 return
             }
+
+            ;(e.target as HTMLFormElement).reset()
+
+            localStorage.setItem('last_written_message', '')
 
             props.onPrompt?.({
                 text,
@@ -77,6 +88,7 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void; pla
             >
                 <div className='flex items-start gap-2'>
                     <textarea
+                        defaultValue={defaultValue}
                         name='message'
                         className='w-full resize-none p-1 text-base text-foreground leading-6 outline-none placeholder:text-primary disabled:opacity-0'
                         placeholder={props.placeholder || 'Type your message here...'}
