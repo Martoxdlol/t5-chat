@@ -124,7 +124,7 @@ export const chatRouter = router({
 
                 await ctx.db.update(schema.user).set({
                     credits: sql`${schema.user.credits} - ${messageCost}`,
-                })
+                }).where(eq(schema.user.id, ctx.user.id))
             }
 
             async function handlePartial(text: string) {
@@ -349,7 +349,7 @@ export const chatRouter = router({
 
                 await ctx.db.update(schema.user).set({
                     credits: sql`${schema.user.credits} - ${messageCost * messages.length}`,
-                })
+                }).where(eq(schema.user.id, ctx.user.id))
             }
 
             async function handlePartial(text: string) {
