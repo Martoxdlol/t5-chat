@@ -2,6 +2,7 @@ import { SendHorizontal } from 'lucide-react'
 import { memo, useCallback, useRef, useState } from 'react'
 import { useLocalStorageState } from '@/hooks/use-local-storage-state'
 import type { Prompt } from '@/lib/types'
+import { RemainingCredits } from '../credits-left'
 import { Button } from '../ui/button'
 import { ModelPicker } from './model-picker'
 
@@ -102,6 +103,7 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void; pla
                 </div>
                 <div className='flex items-center gap-2'>
                     <ModelPicker value={model} onChange={setModel} />
+                    <RemainingCredits />
                 </div>
             </form>
         </div>

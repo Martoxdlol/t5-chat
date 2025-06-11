@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router'
 import { Center } from '@/components/center'
 import { MessageInput } from '@/components/chat/input'
 import { DisplayMessage } from '@/components/chat/message'
+import { useInvalidateRemainingCredits } from '@/components/credits-left'
 import { useTRPC } from '@/lib/api-client'
 import { MessageContent } from '@/lib/message-content'
 import type { ChatMessage, Prompt } from '@/lib/types'
@@ -19,6 +20,8 @@ export function NewChatScreen() {
     const queryClient = useQueryClient()
 
     const navigate = useNavigate()
+
+    const invalidateRemainingCredits = useInvalidateRemainingCredits()
 
     const handlePrompt = useCallback(
         (prompt: Prompt) => {
@@ -77,9 +80,11 @@ export function NewChatScreen() {
                             return oldChats?.map((c) => (c.id === chat.id ? { ...c, emoji } : c))
                         })
                     })
+
+                    setTimeout(() => invalidateRemainingCredits(), 10_000)
                 })
         },
-        [newChatMutation, queryClient, trpc, navigate],
+        [newChatMutation, queryClient, trpc, navigate, invalidateRemainingCredits],
     )
 
     return (

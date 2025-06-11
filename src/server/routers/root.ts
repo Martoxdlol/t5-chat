@@ -1,5 +1,7 @@
+import { eq } from 'drizzle-orm'
+import { schema } from '../db'
 import type { Model } from '../service/models'
-import { publicProcedure, router } from '../trpc'
+import { protectedProcedure, publicProcedure, router } from '../trpc'
 import { chatRouter } from './chat'
 
 type ClientModel = Omit<Model, 'instance'>
@@ -21,6 +23,18 @@ export const appRouter = router({
                     }) as ClientModel,
             ),
             defaultModel: ctx.ai.defaultModel,
+        }
+    }),
+    remainingCredits: protectedProcedure.query(async ({ ctx }) => {
+        const [user] = await ctx.db
+            .select({
+                credits: schema.user.credits,
+            })
+            .from(schema.user)
+            .where(eq(schema.user.id, ctx.user.id))
+
+        return {
+            remainingCredits: user.credits ?? 0,
         }
     }),
 })

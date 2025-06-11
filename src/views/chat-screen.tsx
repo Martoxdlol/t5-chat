@@ -5,6 +5,7 @@ import { AppErrorBoundary } from '@/components/app-error-boundary'
 import { Center } from '@/components/center'
 import { MessageInput } from '@/components/chat/input'
 import { ChatMessagesList } from '@/components/chat/messages-list'
+import { useInvalidateRemainingCredits } from '@/components/credits-left'
 import { Spinner } from '@/components/spinner'
 import { useTRPC } from '@/lib/api-client'
 import { MessageContent } from '@/lib/message-content'
@@ -21,6 +22,8 @@ export function ChatScreen() {
     const promptMutation = useMutation(trpc.chat.prompt.mutationOptions())
 
     const queryClient = useQueryClient()
+
+    const invalidateRemainingCredits = useInvalidateRemainingCredits()
 
     const handlePrompt = useCallback(
         (prompt: Prompt) => {
@@ -92,9 +95,17 @@ export function ChatScreen() {
                             updatedAt: Date.now(),
                         },
                     )
+
+                    setTimeout(() => invalidateRemainingCredits(), 10_000)
                 })
         },
-        [chatId, promptMutation, queryClient.setQueryData, trpc.chat.getChatMessages.queryKey],
+        [
+            chatId,
+            promptMutation,
+            queryClient.setQueryData,
+            trpc.chat.getChatMessages.queryKey,
+            invalidateRemainingCredits,
+        ],
     )
 
     return (
