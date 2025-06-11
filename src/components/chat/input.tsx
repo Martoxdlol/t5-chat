@@ -49,7 +49,7 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void; pla
                 return
             }
 
-            ;(e.target as HTMLFormElement).reset()
+            ; (e.target as HTMLFormElement).reset()
 
             localStorage.setItem('last_written_message', '')
 
@@ -101,7 +101,7 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void; pla
                         <SendHorizontal />
                     </Button>
                 </div>
-                <div className='flex items-center gap-2'>
+                <div className='flex items-center gap-2 overflow-x-auto'>
                     <ModelPicker value={model} onChange={setModel} />
                     <RemainingCredits />
                 </div>
