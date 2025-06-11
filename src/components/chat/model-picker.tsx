@@ -42,7 +42,7 @@ function ModelPickerComponent(props: { value: string | null; onChange: (value: s
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <Button className='h-6' size='sm'>
+                <Button className='h-6' size='sm' type='button'>
                     {selectedModel === undefined ? 'select model' : (selectedModel?.name ?? 'unknown')}
                 </Button>
             </PopoverTrigger>
