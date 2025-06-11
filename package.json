@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "npm-run-all --parallel dev:app dev:server",
         "build": "pnpm run build:app && pnpm run build:server",
-        "dev:app": "vite",
+        "dev:app": "vite --host 0.0.0.0",
         "dev:server": "tsx --watch --env-file=.env src/server/main.ts",
         "build:app": "tsc -b && vite build",
         "build:server": "esbuild src/server/main.ts --bundle --platform=node --outfile=dist/server/main.cjs --format=cjs",

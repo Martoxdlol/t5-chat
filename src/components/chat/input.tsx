@@ -10,7 +10,7 @@ const MAX_ROWS = 10
 
 export const MessageInput = memo(MessageInputComponent)
 
-function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
+function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void; placeholder?: string }) {
     const [rows, setRows] = useState(MIN_ROWS)
 
     const [model, setModel] = useLocalStorageState<string | null>('model', () => null)
@@ -51,8 +51,17 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
 
     const submitButtonRef = useRef<HTMLButtonElement>(null)
 
+    const itIsMobileRef = useRef<boolean>(false)
+
     const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+        if (e.key === 'Unidentified') {
+            itIsMobileRef.current = true
+            return
+        }
+
+        const addLineKey = e.shiftKey || e.ctrlKey || e.metaKey
+
+        if (e.key === 'Enter' && !addLineKey && !itIsMobileRef.current) {
             e.preventDefault()
             const button = submitButtonRef.current
             button!.click()
@@ -70,7 +79,7 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void }) {
                     <textarea
                         name='message'
                         className='w-full resize-none p-1 text-base text-foreground leading-6 outline-none placeholder:text-primary disabled:opacity-0'
-                        placeholder='Type your message here...'
+                        placeholder={props.placeholder || 'Type your message here...'}
                         rows={rows}
                         onChange={handleOnChange}
                         onKeyDown={handleKeyDown}
