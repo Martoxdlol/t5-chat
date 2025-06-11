@@ -12,7 +12,6 @@ import {
     getChatMessages,
 } from '../service/chat'
 import { ensureCompletionAsyncGenerator } from '../service/map-generator'
-import { getDefaultCheapModel } from '../service/models'
 import { protectedProcedure, router } from '../trpc'
 
 export const chatRouter = router({
@@ -60,21 +59,18 @@ export const chatRouter = router({
             const createdAt = new Date()
             const chatTitle = 'New Chat'
 
-            const cheapModel = getDefaultCheapModel(ctx.models).instance
-
-            const expensiveModel = ctx.models.get(input.prompt.model)
-
-            const model = expensiveModel?.instance || cheapModel
+            const model = ctx.ai.models.get(input.prompt.model) ?? ctx.ai.defaultModel
+            const messageCost = model.cost
 
             await ctx.db.transaction(async (tx) => {
-                await tx.insert(schema.chats).values({
+                const ins1 = tx.insert(schema.chats).values({
                     id: chatId,
                     userId: ctx.user.id,
                     title: chatTitle,
                     createdAt: new Date(),
                 })
 
-                await tx.insert(schema.messages).values({
+                const ins2 = tx.insert(schema.messages).values({
                     userId: ctx.user.id,
                     chatId: chatId,
                     role: 'user',
@@ -84,7 +80,7 @@ export const chatRouter = router({
                     createdAt: createdAt,
                 })
 
-                await tx.insert(schema.messages).values({
+                const ins3 = tx.insert(schema.messages).values({
                     userId: ctx.user.id,
                     chatId: chatId,
                     role: 'assistant',
@@ -93,6 +89,22 @@ export const chatRouter = router({
                     content: '',
                     createdAt: createdAt,
                 })
+
+                const userQuery = tx
+                    .select({
+                        credits: schema.user.credits,
+                    })
+                    .from(schema.user)
+                    .where(eq(schema.user.id, ctx.user.id))
+
+                const [user] = await Promise.all([userQuery, ins1, ins2, ins3])
+
+                if (user[0]!.credits < messageCost) {
+                    throw new TRPCError({
+                        code: 'PAYMENT_REQUIRED',
+                        message: 'Not enough credits to create a chat',
+                    })
+                }
             })
 
             async function handleFinish(text: string) {
@@ -109,6 +121,10 @@ export const chatRouter = router({
                             eq(schema.messages.index, 1),
                         ),
                     )
+
+                await ctx.db.update(schema.user).set({
+                    credits: sql`${schema.user.credits} - ${messageCost}`,
+                })
             }
 
             async function handlePartial(text: string) {
@@ -156,19 +172,19 @@ export const chatRouter = router({
             return {
                 id: chatId,
                 title: chatTitle,
-                titleGenerator: generateChatTitle(cheapModel, sanitizedPrompt).then((title) => {
+                titleGenerator: generateChatTitle(ctx.ai.defaultModel.instance, sanitizedPrompt).then((title) => {
                     updateTitle(title).catch((error) => {
                         console.error('Error updating chat title:', error)
                     })
                     return title
                 }),
-                colorGenerator: generateChatColor(cheapModel, sanitizedPrompt).then((color) => {
+                colorGenerator: generateChatColor(ctx.ai.defaultModel.instance, sanitizedPrompt).then((color) => {
                     updateColor(color).catch((error) => {
                         console.error('Error updating chat color:', error)
                     })
                     return color
                 }),
-                emojiGenerator: generateChatEmoji(cheapModel, sanitizedPrompt).then((emoji) => {
+                emojiGenerator: generateChatEmoji(ctx.ai.defaultModel.instance, sanitizedPrompt).then((emoji) => {
                     updateEmoji(emoji).catch((error) => {
                         console.error('Error updating chat emoji:', error)
                     })
@@ -177,7 +193,7 @@ export const chatRouter = router({
                 createdAt: createdAt,
                 firstResponseGenerator: ensureCompletionAsyncGenerator(
                     generateMessage(
-                        model,
+                        model.instance,
                         [
                             {
                                 content: input.prompt.text,
@@ -240,13 +256,8 @@ export const chatRouter = router({
             }),
         )
         .mutation(async ({ ctx, input }) => {
-            const cheapModel = getDefaultCheapModel(ctx.models).instance
-
-            const expensiveModel = ctx.models.get(input.prompt.model)
-
-            const model = expensiveModel?.instance || cheapModel
-
-            const cost = expensiveModel?.cost || 1
+            const model = ctx.ai.models.get(input.prompt.model) ?? ctx.ai.defaultModel
+            const messageCost = model?.cost || 1
 
             const { messages, userMessageIndex, responseMessageIndex } = await ctx.db
                 .transaction(async (tx) => {
@@ -260,7 +271,7 @@ export const chatRouter = router({
                             .where(eq(schema.user.id, ctx.user.id)),
                     ])
 
-                    if (user[0]!.credits < cost * messages.length) {
+                    if (user[0]!.credits < messageCost * messages.length) {
                         throw new TRPCError({
                             code: 'PAYMENT_REQUIRED',
                             message: 'Not enough credits to generate a response',
@@ -337,7 +348,7 @@ export const chatRouter = router({
                     )
 
                 await ctx.db.update(schema.user).set({
-                    credits: sql`${schema.user.credits} - ${cost * messages.length}`,
+                    credits: sql`${schema.user.credits} - ${messageCost * messages.length}`,
                 })
             }
 
@@ -358,7 +369,7 @@ export const chatRouter = router({
             }
 
             const generator = ensureCompletionAsyncGenerator(
-                generateMessage(model, messages, input.prompt.model, handleFinish, handlePartial),
+                generateMessage(model.instance, messages, input.prompt.model, handleFinish, handlePartial),
             )
 
             return {

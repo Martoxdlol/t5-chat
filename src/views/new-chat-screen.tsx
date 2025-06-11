@@ -28,7 +28,7 @@ export function NewChatScreen() {
                 .mutateAsync({
                     prompt: {
                         text: prompt.text,
-                        model: 'todo:implement-model',
+                        model: prompt.model,
                     },
                 })
                 .then(async (chat) => {

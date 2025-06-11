@@ -1,11 +1,40 @@
 import { openai } from '@ai-sdk/openai'
-import { createOpenRouter } from '@openrouter/ai-sdk-provider'
+import { createOpenRouter, type OpenRouterProvider } from '@openrouter/ai-sdk-provider'
 import type { LanguageModelV1 } from 'ai'
 
+const GEMINI_2_FLASH_COMPLETION_COST = 0.0000004
+
+const FEATURED_MODELS = new Set([
+    'google/gemini-2.0-flash-001',
+    'google/gemini-2.5-flash-preview',
+    'google/gemini-2.5-flash-preview:thinking',
+    'google/gemini-2.5-pro-preview',
+    'openai/gpt-3.5-turbo',
+    'openai/o3-mini',
+    'openai/o4-mini',
+    'openai/o4-mini-high',
+    'openai/gpt-4',
+    'openai/gpt-4-turbo',
+    'openai/gpt-4.1',
+    'openai/codex-mini',
+    'anthropic/claude-3.7-sonnet',
+    'anthropic/claude-sonnet-4',
+    'anthropic/claude-opus-4',
+    'perplexity/r1-1776',
+])
+
+// More providers could be added here in the future
+export type ModelProvider = 'openrouter' | 'openai'
+
 export type Model = {
-    provider: 'openrouter' | 'openai'
+    // Unique identifier for the model
+    id: string
+    // Model provider
+    provider: ModelProvider
     // Model name
     name: string
+    // Featured (top model)
+    featured: boolean
     // Model instance (to be passed to ai-sdk)
     instance: LanguageModelV1
     // Can input text
@@ -14,6 +43,12 @@ export type Model = {
     file: boolean
     // Cost relative to Gemini 2.0 Flash
     cost: number
+}
+
+export type AIContext = {
+    models: Map<string, Model>
+    defaultModel: Model
+    openrouter: OpenRouterProvider | null
 }
 
 type OpenRouterModel = {
@@ -33,9 +68,16 @@ async function fetchAvailableModels(): Promise<OpenRouterModel[]> {
     return (await fetch('https://openrouter.ai/api/v1/models').then((r) => r.json())).data as OpenRouterModel[]
 }
 
-const GEMINI_2_FLASH_COMPLETION_COST = 0.0000004
+// Cost relative to Gemini 2.0 Flash
+function getModelCost(model: OpenRouterModel): number {
+    if (!model.pricing || !model.pricing.completion) {
+        return 0.2 // Default cost if not specified
+    }
 
-export async function getModels(): Promise<Map<string, Model>> {
+    return model.pricing.completion / GEMINI_2_FLASH_COMPLETION_COST
+}
+
+export async function createAIContext(): Promise<AIContext> {
     if (!process.env.OPENROUTER_API_KEY && !process.env.OPENAI_API_KEY) {
         throw new Error(
             'No API keys provided for OpenRouter or OpenAI.\nPlease set OPENROUTER_API_KEY or OPENAI_API_KEY in your environment variables.',
@@ -44,24 +86,23 @@ export async function getModels(): Promise<Map<string, Model>> {
 
     const models = new Map<string, Model>()
 
+    let openrouter: OpenRouterProvider | null = null
+
     if (process.env.OPENROUTER_API_KEY) {
         const availableModels = await fetchAvailableModels()
 
-        const openrouter = createOpenRouter({
+        openrouter = createOpenRouter({
             apiKey: process.env.OPENROUTER_API_KEY,
         })
 
         for (const model of availableModels) {
             const instance = openrouter.chat(model.id)
 
-            // Cost relative to Gemini 2.0 Flash
-            let cost = model.pricing.completion / GEMINI_2_FLASH_COMPLETION_COST
-
-            if (cost < 0.2) {
-                cost = 0.2
-            }
+            const cost = getModelCost(model)
 
             models.set(model.id, {
+                featured: FEATURED_MODELS.has(model.id),
+                id: model.id,
                 provider: 'openrouter',
                 name: model.name,
                 instance,
@@ -73,50 +114,72 @@ export async function getModels(): Promise<Map<string, Model>> {
     }
 
     if (process.env.OPENAI_API_KEY) {
-        models.set('openai_api/gpt-3.5-turbo', {
+        models.set('openai_provider/gpt-3.5-turbo', {
+            id: 'openai_provider/gpt-3.5-turbo',
+            featured: true,
             provider: 'openai',
-            name: 'OpenAI GPT-3.5 Turbo',
+            name: 'GPT-3.5 Turbo',
             instance: openai('gpt-3.5-turbo'),
             image: false,
             file: false,
             cost: 1.5,
         })
-        models.set('openai_api/gpt-4', {
+        models.set('openai_provider/gpt-4', {
+            id: 'openai_provider/gpt-4',
+            featured: true,
             provider: 'openai',
-            name: 'OpenAI GPT-4',
+            name: 'GPT-4',
             instance: openai('gpt-4'),
             image: false,
             file: false,
             cost: 4,
         })
-        models.set('openai_api/gpt-4-turbo', {
+        models.set('openai_provider/gpt-4-turbo', {
+            id: 'openai_provider/gpt-4-turbo',
+            featured: true,
             provider: 'openai',
-            name: 'OpenAI GPT-4 Turbo',
+            name: 'GPT-4 Turbo',
             instance: openai('gpt-4-turbo'),
             image: false,
             file: false,
             cost: 2.5,
         })
-        models.set('openai_api/gpt-4o', {
+        models.set('openai_provider/gpt-4o', {
+            id: 'openai_provider/gpt-4o',
+            featured: true,
             provider: 'openai',
-            name: 'OpenAI GPT-4o',
+            name: 'GPT-4o',
             instance: openai('gpt-4o'),
             image: false,
             file: false,
             cost: 2.5,
         })
-        models.set('openai_api/gpt-4o-mini', {
+        models.set('openai_provider/gpt-4o-mini', {
+            id: 'openai_provider/gpt-4o-mini',
+            featured: true,
             provider: 'openai',
-            name: 'OpenAI GPT-4o Mini',
+            name: 'GPT-4o Mini',
             instance: openai('gpt-4o-mini'),
             image: false,
             file: false,
             cost: 1,
         })
-        models.set('openai_api/o3-mini', {
+        models.set('openai_provider/o3-mini', {
+            id: 'openai_provider/o3-mini',
+            featured: true,
             provider: 'openai',
-            name: 'OpenAI GPT-4o Mini (o3-mini)',
+            name: 'O3 Mini',
             instance: openai('o3-mini'),
+            image: false,
+            file: false,
+            cost: 1,
+        })
+        models.set('openai_provider/o4-mini', {
+            id: 'openai_provider/o4-mini',
+            featured: true,
+            provider: 'openai',
+            name: 'O4 Mini',
+            instance: openai('o4-mini'),
             image: false,
             file: false,
             cost: 1,
@@ -127,41 +190,15 @@ export async function getModels(): Promise<Map<string, Model>> {
         throw new Error('No models available. Please check your API keys and try again.')
     }
 
-    return models
-}
-
-export function getDefaultCheapModel(models: Map<string, Model>): Model & { id: string } {
-    // o3-mini or 2.0 Flash
-    const result = Array.from(models.entries()).find(([id]) => {
-        if (id === 'openai_api/o3-mini') {
-            return true
-        }
-
-        if (id === 'google/gemini-2.0-flash-001') {
-            return true
-        }
-
-        if (id === 'openai/o3-mini') {
-            return true
-        }
-    })
-
-    if (result) {
-        return { ...result[1]!, id: result[0]! }
-    }
-
-    console.warn('No default cheap model found, returning the cheapest model instead.')
-
-    // find cheapest model
-    const cheapestModel = Array.from(models.entries()).reduce(([prevId, prev], [currId, curr]) => {
-        if (prev.cost < curr.cost) {
-            return [prevId, prev]
-        }
-        return [currId, curr]
-    })
+    const defaultModel =
+        models.get('google/gemini-2.0-flash-001') ??
+        models.get('openai_provider/gpt-3.5-turbo') ??
+        models.get('openai_provider/o4-mini') ??
+        models.values().next().value!
 
     return {
-        ...cheapestModel[1]!,
-        id: cheapestModel[0]!,
+        models,
+        defaultModel,
+        openrouter,
     }
 }
