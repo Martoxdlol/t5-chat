@@ -1,6 +1,31 @@
 services:
   app:
     build: .
+    restart: unless-stopped
     ports:
       - "3000:3000"
+    environment:
+      # Required: BASE_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, (OPENAI_API_KEY or OPENROUTER_API_KEY)
+      - NODE_ENV=${NODE_ENV:-production}
+      - BASE_URL=${BASE_URL:-http://localhost:3000}
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-M4HR1Q0aCaDJgHAb}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - DATABASE_URL=${DATABASE_URL:-mysql://t5user:t5password@db:3306/t5chat}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPEOPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+  db:
+    image: mysql:8.4
     restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-t5root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-t5chat}
+      MYSQL_USER: ${MYSQL_USER:-t5user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-t5password}
+    # ports:
+    #   - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+volumes:
+  db_data:
+    driver: local
