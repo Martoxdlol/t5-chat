@@ -11,10 +11,26 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
+import { usePrimaryScrollY } from '../primary-scroll-provider'
+import { cn } from '@/lib/utils'
 
 export const ChatAppBar = memo(ChatAppBarComponent)
 
 function ChatAppBarComponent() {
+    const scrollY = usePrimaryScrollY()
+
+    const showShadow = scrollY > 0
+
+    return (
+        <div className={cn('flex h-14 items-center gap-2 bg-primary-foreground px-4', { 'shadow-xl': showShadow })}>
+            <ChatAppBarContentMemo />
+        </div>
+    )
+}
+
+const ChatAppBarContentMemo = memo(ChatAppBarContent)
+
+function ChatAppBarContent() {
     const location = useLocation()
 
     const params = useParams()
@@ -53,7 +69,7 @@ function ChatAppBarComponent() {
     const canGoBack = location.state === 'back-to-home'
 
     return (
-        <div className='flex h-14 items-center gap-2 bg-background px-4 shadow'>
+        <>
             {canGoBack && (
                 <IconButton onPress={() => window.history.back()} icon={<ArrowLeftIcon />} aria-label='back' />
             )}
@@ -66,19 +82,21 @@ function ChatAppBarComponent() {
                 />
             )}
             <h2 className='min-w-0 shrink grow overflow-hidden text-ellipsis text-nowrap'>{chatTitle}</h2>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <IconButton className='shrink-0' icon={<EllipsisVerticalIcon />} aria-label='chat-options' />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className='border-border'>
-                    <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => chatId && deleteChat({ chatId })}>
-                            <Trash2Icon />
-                            Delete chat
-                        </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
+            {chatId && (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <IconButton className='shrink-0' icon={<EllipsisVerticalIcon />} aria-label='chat-options' />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className='border-border'>
+                        <DropdownMenuGroup>
+                            <DropdownMenuItem onClick={() => chatId && deleteChat({ chatId })}>
+                                <Trash2Icon />
+                                Delete chat
+                            </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )}
+        </>
     )
 }

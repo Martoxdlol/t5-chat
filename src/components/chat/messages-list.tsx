@@ -1,7 +1,8 @@
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
-import { memo, useCallback, useLayoutEffect, useRef } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { DisplayMessage } from '@/components/chat/message'
 import { trpc as apiClient, useTRPC } from '@/lib/api-client'
+import { useSetPrimaryScrollYSetter } from '../primary-scroll-provider'
 
 export const ChatMessagesList = memo(ChatMessagesListComponent)
 
@@ -14,6 +15,8 @@ function ChatMessagesListComponent(props: { chatId: string }) {
         trpc.chat.getChatMessages.queryOptions({ chatId }, { staleTime: 1000 * 60 * 5, refetchOnMount: false }),
     )
 
+    const setPrimaryScrollY = useSetPrimaryScrollYSetter()
+
     const containerRef = useRef<HTMLDivElement>(null)
 
     // biome-ignore lint/correctness/useExhaustiveDependencies: I need it to trigger on message added
@@ -24,6 +27,8 @@ function ChatMessagesListComponent(props: { chatId: string }) {
                 top: scrollHeight,
                 behavior: 'smooth',
             })
+
+            setPrimaryScrollY(scrollHeight)
         }
     }, [data.length, containerRef.current])
 
@@ -53,6 +58,22 @@ function ChatMessagesListComponent(props: { chatId: string }) {
             })
         })
     }, [data, chatId, queryClient, trpc])
+
+    useEffect(() => {
+        const abortController = new AbortController()
+
+        containerRef.current?.addEventListener(
+            'scroll',
+            () => {
+                setPrimaryScrollY(containerRef.current!.scrollTop)
+            },
+            { signal: abortController.signal },
+        )
+
+        return () => {
+            abortController.abort()
+        }
+    }, [])
 
     return (
         <div className='size-full overflow-y-auto' ref={containerRef}>
