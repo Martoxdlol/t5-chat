@@ -19,10 +19,16 @@ export const ChatAppBar = memo(ChatAppBarComponent)
 function ChatAppBarComponent() {
     const scrollY = usePrimaryScrollY()
 
-    const showShadow = scrollY > 0
+    const showSmallShadow = scrollY > 0 && scrollY <= 4
+    const showShadow = scrollY > 4
 
     return (
-        <div className={cn('flex h-14 items-center gap-2 bg-primary-foreground px-4', { 'shadow-xl': showShadow })}>
+        <div
+            className={cn('flex h-14 items-center gap-2 bg-primary-foreground px-4 transition-shadow', {
+                'shadow-sm': showSmallShadow,
+                'shadow-md': showShadow,
+            })}
+        >
             <ChatAppBarContentMemo />
         </div>
     )
