@@ -44,7 +44,6 @@ function ChatMessagesListComponent(props: { chatId: string }) {
                     return (
                         messages?.map((m) => {
                             if (m.index === index) {
-                                console.log('Updating message:', m.index, updatedMsg)
                                 return {
                                     ...m,
                                     status: updatedMsg.status,

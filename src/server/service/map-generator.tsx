@@ -5,7 +5,6 @@ export async function* ensureCompletionAsyncGenerator(generator: AsyncGenerator<
             // generator to completion, regardless of what the consumer does.
             try {
                 for await (const value of generator) {
-                    console.log('Pushing value to stream:', value)
                     controller.enqueue(value)
                 }
                 // Signal that the stream is finished.
