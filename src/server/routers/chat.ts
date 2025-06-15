@@ -88,6 +88,7 @@ export const chatRouter = router({
                     index: 1,
                     content: '',
                     createdAt: createdAt,
+                    model: model.id,
                 })
 
                 const userQuery = tx
@@ -309,6 +310,7 @@ export const chatRouter = router({
                         index: responseMessageIndex,
                         content: '',
                         createdAt: new Date(),
+                        model: model.id,
                     })
 
                     await Promise.all([insertMsg1, insertMsg2])
