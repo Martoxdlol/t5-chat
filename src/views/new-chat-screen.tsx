@@ -51,6 +51,7 @@ export function NewChatScreen() {
                                 content: '',
                                 createdAt: chat.createdAt,
                                 generator: chat.firstResponseGenerator,
+                                model: chat.model,
                                 contentManager: new MessageContent({
                                     content: '',
                                     generator: chat.firstResponseGenerator,

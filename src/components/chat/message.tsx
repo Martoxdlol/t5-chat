@@ -8,7 +8,7 @@ import { RenderMarkdown } from './markdown'
 export const DisplayMessage = memo(DisplayMessageComponent)
 
 function DisplayMessageComponent(
-    props: Pick<ChatMessage, 'content' | 'role' | 'contentManager' | 'status'> & { onPoll?: () => void },
+    props: Pick<ChatMessage, 'content' | 'role' | 'contentManager' | 'status' | 'model'> & { onPoll?: () => void },
 ) {
     const message = props
     // Assuming 'role' determines if the message is from the user or another party (e.g., 'assistant', 'bot').
@@ -78,6 +78,16 @@ function DisplayMessageComponent(
                 {generationFailed && (
                     <p className='font-semibold text-red-500 text-sm'>Generation failed. Please try again.</p>
                 )}
+
+                {/* <div className='text-muted-foreground text-xs mt-1 flex gap-2 items-center'>
+                    <p>gpt-4 </p>
+                    <button type='button'>
+                        fork
+                    </button>
+                    <button type='button'>
+                        re-generate
+                    </button>
+                </div> */}
             </div>
         )
     }

@@ -195,6 +195,7 @@ export const chatRouter = router({
                     return emoji
                 }),
                 createdAt: createdAt,
+                model: model.id,
                 firstResponseGenerator: ensureCompletionAsyncGenerator(
                     generateMessage(
                         model.instance,
@@ -240,6 +241,7 @@ export const chatRouter = router({
                     status: schema.messages.status,
                     content: schema.messages.content,
                     createdAt: schema.messages.createdAt,
+                    model: schema.messages.model,
                 })
                 .from(schema.messages)
                 .where(

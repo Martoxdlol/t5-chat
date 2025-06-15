@@ -11,6 +11,7 @@ export async function getChatMessages(db: DBTX, userId: string, chatId: string):
             status: schema.messages.status,
             content: schema.messages.content,
             createdAt: schema.messages.createdAt,
+            model: schema.messages.model,
         })
         .from(schema.messages)
         .where(and(eq(schema.messages.userId, userId), eq(schema.messages.chatId, chatId)))

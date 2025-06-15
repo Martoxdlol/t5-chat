@@ -16,4 +16,5 @@ export type ChatMessage = {
     createdAt: Date
     generator?: AsyncGenerator<string>
     contentManager?: MessageContent
+    model?: string
 }
