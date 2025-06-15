@@ -11,14 +11,15 @@ interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
 export function IconButton({ icon, onPress, ...props }: IconButtonProps & { onPress?: () => void }) {
     return (
         <button
-            onMouseDown={
-                props.onMouseDown ??
-                ((e) => {
-                    e.stopPropagation()
-                    e.preventDefault()
-                    onPress?.()
-                })
-            }
+            // DISABLED FOR NOW: It is causing unexpected behavior in some cases
+            // onMouseDown={
+            //     props.onMouseDown ??
+            //     ((e) => {
+            //         e.stopPropagation()
+            //         e.preventDefault()
+            //         onPress?.()
+            //     })
+            // }
             onClick={
                 props.onClick ??
                 ((e) => {

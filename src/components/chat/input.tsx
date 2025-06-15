@@ -49,7 +49,7 @@ function MessageInputComponent(props: { onPrompt?: (prompt: Prompt) => void; pla
                 return
             }
 
-            ; (e.target as HTMLFormElement).reset()
+            ;(e.target as HTMLFormElement).reset()
 
             localStorage.setItem('last_written_message', '')
 

@@ -25,6 +25,7 @@ export const messages = mysqlTable(
         index: int('index').notNull(),
         content: text('content').notNull(),
         createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+        model: text('model').notNull().default('unknown'),
     },
     (t) => [primaryKey({ columns: [t.userId, t.chatId, t.index] })],
 )

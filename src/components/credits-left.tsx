@@ -23,7 +23,7 @@ export function RemainingCredits() {
 
     return (
         <Button className='h-6' size='sm' variant='outline' type='button'>
-            {r?.remainingCredits} credits left
+            {r?.remainingCredits.toFixed(0)} credits left
         </Button>
     )
 }

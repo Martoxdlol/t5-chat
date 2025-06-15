@@ -122,9 +122,12 @@ export const chatRouter = router({
                         ),
                     )
 
-                await ctx.db.update(schema.user).set({
-                    credits: sql`${schema.user.credits} - ${messageCost}`,
-                }).where(eq(schema.user.id, ctx.user.id))
+                await ctx.db
+                    .update(schema.user)
+                    .set({
+                        credits: sql`${schema.user.credits} - ${messageCost}`,
+                    })
+                    .where(eq(schema.user.id, ctx.user.id))
             }
 
             async function handlePartial(text: string) {
@@ -347,9 +350,12 @@ export const chatRouter = router({
                         ),
                     )
 
-                await ctx.db.update(schema.user).set({
-                    credits: sql`${schema.user.credits} - ${messageCost * messages.length}`,
-                }).where(eq(schema.user.id, ctx.user.id))
+                await ctx.db
+                    .update(schema.user)
+                    .set({
+                        credits: sql`${schema.user.credits} - ${messageCost * messages.length}`,
+                    })
+                    .where(eq(schema.user.id, ctx.user.id))
             }
 
             async function handlePartial(text: string) {
@@ -377,5 +383,23 @@ export const chatRouter = router({
                 userMessageIndex,
                 responseMessageIndex,
             }
+        }),
+
+    deleteChat: protectedProcedure
+        .input(
+            z.object({
+                chatId: z.string(),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            await ctx.db.transaction(async (tx) => {
+                await tx
+                    .delete(schema.messages)
+                    .where(and(eq(schema.messages.userId, ctx.user.id), eq(schema.messages.chatId, input.chatId)))
+
+                await tx
+                    .delete(schema.chats)
+                    .where(and(eq(schema.chats.userId, ctx.user.id), eq(schema.chats.id, input.chatId)))
+            })
         }),
 })
