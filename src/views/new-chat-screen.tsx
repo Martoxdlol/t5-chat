@@ -90,7 +90,7 @@ export function NewChatScreen() {
 
     return (
         <ChatView input={<MessageInput onPrompt={handlePrompt} />}>
-            {optimisticMsg && <DisplayMessage content={optimisticMsg} role='user' status='prompted' />}
+            {optimisticMsg && <DisplayMessage index={0} content={optimisticMsg} role='user' status='prompted' />}
             {!optimisticMsg && (
                 <Center>
                     <p className='text-balance px-10 text-center text-2xl text-primary'>

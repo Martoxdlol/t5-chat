@@ -72,13 +72,15 @@ function ChatMessagesListComponent(props: { chatId: string }) {
         return () => {
             abortController.abort()
         }
-    }, [])
+    }, [setPrimaryScrollY])
 
     return (
         <div className='size-full overflow-y-auto' ref={containerRef}>
             <div className='h-fit w-full'>
                 {data?.map((msg) => (
                     <DisplayMessage
+                        chatId={chatId}
+                        index={msg.index}
                         key={msg.index}
                         content={msg.content}
                         role={msg.role}

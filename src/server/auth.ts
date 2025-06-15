@@ -5,7 +5,9 @@ import type { DBType } from './db'
 export function createAuth(db: DBType) {
     return betterAuth({
         secret: process.env.BETTER_AUTH_SECRET,
-        baseURL: process.env.BASE_URL,
+        baseURL:
+            process.env.BASE_URL ||
+            (process.env.NODE_ENV === 'production' ? 'http://localhost:3000' : 'http://localhost:5173'),
         database: drizzleAdapter(db, {
             provider: 'mysql',
         }),

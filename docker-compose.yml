@@ -22,8 +22,8 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-t5chat}
       MYSQL_USER: ${MYSQL_USER:-t5user}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-t5password}
-    # ports:
-    #   - "3306:3306"
+    ports:
+      - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
 volumes:

@@ -2,13 +2,18 @@ import { memo, useEffect, useState } from 'react'
 import type { ChatMessage } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import 'katex/dist/katex.min.css'
+import { useQueryClient } from '@tanstack/react-query'
 import { Loader } from 'lucide-react'
+import { useTRPC } from '@/lib/api-client'
 import { RenderMarkdown } from './markdown'
 
 export const DisplayMessage = memo(DisplayMessageComponent)
 
 function DisplayMessageComponent(
-    props: Pick<ChatMessage, 'content' | 'role' | 'contentManager' | 'status' | 'model'> & { onPoll?: () => void },
+    props: Pick<ChatMessage, 'content' | 'role' | 'contentManager' | 'status' | 'model' | 'index'> & {
+        onPoll?: () => void
+        chatId?: string
+    },
 ) {
     const message = props
     // Assuming 'role' determines if the message is from the user or another party (e.g., 'assistant', 'bot').
@@ -17,15 +22,35 @@ function DisplayMessageComponent(
 
     const [generated, setGenerated] = useState<string | null>(null)
 
+    const trpc = useTRPC()
+    const queryClient = useQueryClient()
+
     useEffect(() => {
-        const unsub = message.contentManager?.subscribe((content) => {
+        const unsub = message.contentManager?.subscribe((content, finished) => {
             setGenerated(content)
+            if (finished && props.chatId) {
+                queryClient.setQueryData(trpc.chat.getChatMessages.queryKey({ chatId: props.chatId }), (prev) => {
+                    if (!prev) return prev
+
+                    return prev.map((msg) => {
+                        if (msg.index === message.index) {
+                            return {
+                                ...msg,
+                                contentManager: undefined, // Clear the content manager after completion
+                                content: content,
+                                status: 'completed',
+                            }
+                        }
+                        return msg
+                    })
+                })
+            }
         })
 
         return () => {
             unsub?.()
         }
-    }, [message])
+    }, [message, trpc, queryClient, props.chatId])
 
     const content = (generated ?? message.content).trim()
 
