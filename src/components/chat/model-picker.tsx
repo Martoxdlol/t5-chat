@@ -1,14 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
-import { memo, useEffect, useMemo } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { useTRPC } from '@/lib/api-client'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
+import { Separator } from '../ui/separator'
+import { Input } from '../ui/input' // Added Input import
 
 export const ModelPicker = memo(ModelPickerComponent)
 
 function ModelPickerComponent(props: { value: string | null; onChange: (value: string | null) => void }) {
     const trpc = useTRPC()
+    const [showAll, setShowAll] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('') // Added search term state
 
     const { data: ai } = useQuery(trpc.models.queryOptions())
 
@@ -16,11 +21,11 @@ function ModelPickerComponent(props: { value: string | null; onChange: (value: s
         if (!props.value) return undefined
 
         const model = ai?.models.find((m) => m.id === props.value)
-        if (!model) return null
+        if (!model) return null // Indicates a value exists but doesn't match any known model
         return model
     }, [props.value, ai])
 
-    const sorted = useMemo(() => {
+    const sortedModels = useMemo(() => {
         if (!ai) return []
 
         return ai.models.slice().sort((a, b) => {
@@ -33,49 +38,114 @@ function ModelPickerComponent(props: { value: string | null; onChange: (value: s
         })
     }, [ai])
 
+    const featuredModels = useMemo(() => {
+        return sortedModels.filter((m) => m.featured)
+    }, [sortedModels])
+
+    const modelsToDisplay = useMemo(() => {
+        // If there's a search term, filter all sorted models and ignore showAll/featured
+        if (searchTerm) {
+            return sortedModels.filter((model) => model.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        }
+        // If no search term, use showAll to pick between all sorted or just featured
+        return showAll ? sortedModels : featuredModels
+    }, [searchTerm, showAll, sortedModels, featuredModels])
+
     useEffect(() => {
         if (!selectedModel && ai?.defaultModel) {
             props.onChange(ai.defaultModel.id)
         }
     }, [ai, props.onChange, selectedModel])
 
+    useEffect(() => {
+        // Reset showAll state and search term when popover closes
+        if (!isOpen) {
+            setShowAll(false)
+            setSearchTerm('')
+        }
+    }, [isOpen])
+
     return (
-        <Popover>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
                 <Button className='h-6' size='sm' type='button'>
-                    {selectedModel === undefined ? 'select model' : (selectedModel?.name ?? 'unknown')}
+                    {selectedModel === undefined ? 'Select model' : (selectedModel?.name ?? 'Unknown model')}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className='flex max-h-[calc(var(--screen-height)_-_100px)] w-[100vw] max-w-200 overflow-y-auto border-accent p-1'>
-                <ModelPickerGrid
-                    models={sorted}
-                    onSelect={(model) => {
-                        props.onChange(model.id)
-                    }}
-                    selectedModel={selectedModel?.id}
+            <PopoverContent className='flex flex-col max-h-[calc(var(--screen-height)_-_100px)] w-[100vw] max-w-200 overflow-y-auto border-accent p-2 space-y-2'>
+                <Input
+                    autoFocus
+                    className='shrink-0'
+                    type='text'
+                    placeholder='Search models...'
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                 />
+
+                {modelsToDisplay.length === 0 && searchTerm ? (
+                    <div className='p-4 text-center text-sm text-muted-foreground'>
+                        No models found for "{searchTerm}".
+                    </div>
+                ) : (
+                    <ModelPickerList
+                        models={modelsToDisplay}
+                        onSelect={(model) => {
+                            props.onChange(model.id)
+                            setIsOpen(false)
+                            setSearchTerm('') // Clear search on selection
+                        }}
+                        selectedModel={selectedModel?.id}
+                    />
+                )}
+
+                {/* Toggle button for showing all or featured models */}
+                {!searchTerm && featuredModels.length < sortedModels.length && sortedModels.length > 0 && (
+                    <>
+                        <Separator />
+                        {showAll ? (
+                            <Button variant='ghost' size='sm' onClick={() => setShowAll(false)} className='w-full'>
+                                Show Featured Models
+                            </Button>
+                        ) : (
+                            <Button variant='ghost' size='sm' onClick={() => setShowAll(true)} className='w-full'>
+                                Show All Models ({sortedModels.length})
+                            </Button>
+                        )}
+                    </>
+                )}
             </PopoverContent>
         </Popover>
     )
 }
 
-const ModelPickerGrid = memo(ModelPickerGridComponent)
+// Renamed from ModelPickerGrid to ModelPickerList
+const ModelPickerList = memo(ModelPickerListComponent)
 
-function ModelPickerGridComponent(props: {
+// Renamed from ModelPickerGridComponent to ModelPickerListComponent and updated rendering
+function ModelPickerListComponent(props: {
     models: Array<{ id: string; name: string; featured: boolean; cost: number }>
     onSelect: (model: { id: string; name: string }) => void
     selectedModel?: string
 }) {
+    if (props.models.length === 0) {
+        // This message is shown if modelsToDisplay is empty and not due to an active search
+        return <div className='p-4 text-center text-sm text-muted-foreground'>No models to display.</div>
+    }
     return (
-        <div className='grid size-full grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-1'>
+        <div className='flex w-full flex-col gap-1'>
+            {' '}
+            {/* Changed from grid to flex list */}
             {props.models.map((model) => (
                 <Button
                     key={model.id}
                     variant={props.selectedModel === model.id ? 'default' : 'outline'}
                     onClick={() => props.onSelect(model)}
-                    className={cn('h-auto min-h-10 whitespace-normal text-center text-xs', {
-                        '!border-yellow-600/50 border': model.featured,
-                    })}
+                    className={cn(
+                        'h-auto min-h-10 w-full whitespace-normal justify-start text-left text-xs', // Adjusted for list view
+                        {
+                            '!border-yellow-600/50 border': model.featured,
+                        },
+                    )}
                 >
                     {model.name}
                 </Button>

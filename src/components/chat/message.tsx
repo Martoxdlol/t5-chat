@@ -39,7 +39,7 @@ function DisplayMessageComponent(
                                 contentManager: undefined, // Clear the content manager after completion
                                 content: content,
                                 status: 'completed',
-                            }
+                            } as ChatMessage
                         }
                         return msg
                     })

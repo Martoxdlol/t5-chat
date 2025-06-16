@@ -191,6 +191,7 @@ export async function createAIContext(): Promise<AIContext> {
     }
 
     const defaultModel =
+        models.get('openai/o4-mini') ??
         models.get('google/gemini-2.0-flash-001') ??
         models.get('openai_provider/gpt-3.5-turbo') ??
         models.get('openai_provider/o4-mini') ??
