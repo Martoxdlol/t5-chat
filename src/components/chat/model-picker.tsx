@@ -73,14 +73,15 @@ function ModelPickerComponent(props: { value: string | null; onChange: (value: s
                 </Button>
             </PopoverTrigger>
             <PopoverContent className='flex flex-col max-h-[calc(var(--screen-height)_-_100px)] w-[100vw] max-w-200 overflow-y-auto border-accent p-2 space-y-2'>
-                <Input
-                    autoFocus
-                    className='shrink-0'
-                    type='text'
-                    placeholder='Search models...'
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                <div className='shrink-0 sticky top-0 z-10 bg-background'>
+                    <Input
+                        autoFocus
+                        type='text'
+                        placeholder='Search models...'
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
 
                 {modelsToDisplay.length === 0 && searchTerm ? (
                     <div className='p-4 text-center text-sm text-muted-foreground'>
@@ -104,11 +105,11 @@ function ModelPickerComponent(props: { value: string | null; onChange: (value: s
                         <Separator />
                         {showAll ? (
                             <Button variant='ghost' size='sm' onClick={() => setShowAll(false)} className='w-full'>
-                                Show Featured Models
+                                Show featured models only
                             </Button>
                         ) : (
                             <Button variant='ghost' size='sm' onClick={() => setShowAll(true)} className='w-full'>
-                                Show All Models ({sortedModels.length})
+                                Show all models ({sortedModels.length})
                             </Button>
                         )}
                     </>
@@ -133,22 +134,18 @@ function ModelPickerListComponent(props: {
     }
     return (
         <div className='flex w-full flex-col gap-1'>
-            {' '}
             {/* Changed from grid to flex list */}
             {props.models.map((model) => (
-                <Button
+                <button
                     key={model.id}
-                    variant={props.selectedModel === model.id ? 'default' : 'outline'}
                     onClick={() => props.onSelect(model)}
-                    className={cn(
-                        'h-auto min-h-10 w-full whitespace-normal justify-start text-left text-xs', // Adjusted for list view
-                        {
-                            '!border-yellow-600/50 border': model.featured,
-                        },
-                    )}
+                    className='hover:bg-accent text-left p-2 text-sm rounded-md flex justify-between'
                 >
-                    {model.name}
-                </Button>
+                    <span>{model.name}</span>
+                    {/* <span className='text-xs text-muted-foreground text-right'>
+                        {model.cost.toFixed(2)}
+                    </span> */}
+                </button>
             ))}
         </div>
     )
