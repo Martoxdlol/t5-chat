@@ -14,7 +14,7 @@ export const user = mysqlTable('user', {
     updatedAt: timestamp('updated_at')
         .$defaultFn(() => /* @__PURE__ */ new Date())
         .notNull(),
-    credits: float('credits').default(1500).notNull(),
+    credits: float('credits').default(3000).notNull(),
 })
 
 export const session = mysqlTable('session', {

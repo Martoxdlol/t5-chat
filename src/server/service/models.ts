@@ -4,23 +4,28 @@ import type { LanguageModelV1 } from 'ai'
 
 const GEMINI_2_FLASH_COMPLETION_COST = 0.0000004
 
-const FEATURED_MODELS = new Set([
-    'google/gemini-2.0-flash-001',
-    'google/gemini-2.5-flash-preview',
-    'google/gemini-2.5-flash-preview:thinking',
-    'google/gemini-2.5-pro-preview',
-    'openai/gpt-3.5-turbo',
-    'openai/o3-mini',
-    'openai/o4-mini',
-    'openai/o4-mini-high',
-    'openai/gpt-4',
-    'openai/gpt-4-turbo',
-    'openai/gpt-4.1',
-    'openai/codex-mini',
-    'anthropic/claude-3.7-sonnet',
-    'anthropic/claude-sonnet-4',
-    'anthropic/claude-opus-4',
-    'perplexity/r1-1776',
+const FEATURED_MODELS = new Map<string, string>([
+    ['google/gemini-2.0-flash-001', 'Gemini 2.0 Flash'],
+    ['google/gemini-2.5-flash-preview', 'Gemini 2.5 Flash'],
+    ['google/gemini-2.5-flash-preview:thinking', 'Gemini 2.5 Flash (thinking)'],
+    ['google/gemini-2.5-pro-preview', 'Gemini 2.5 Pro'],
+    ['openai/gpt-3.5-turbo', 'GPT-3.5 Turbo'],
+    ['openai/o3-mini', 'O3 Mini'],
+    ['openai/o4-mini', 'O4 Mini'],
+    ['openai/o4-mini-high', 'O4 Mini High'],
+    ['openai/gpt-4', 'GPT-4'],
+    ['openai/gpt-4-turbo', 'GPT-4 Turbo'],
+    ['openai/gpt-4.1', 'GPT-4.1'],
+    ['openai/codex-mini', 'Codex Mini'],
+    ['anthropic/claude-3.7-sonnet', 'Claude 3.7 Sonnet'],
+    ['anthropic/claude-sonnet-4', 'Claude Sonnet 4'],
+    ['anthropic/claude-opus-4', 'Claude Opus 4'],
+    ['perplexity/r1-1776', 'R1 1776'],
+])
+
+const EXCLUDED_MODELS = new Set<string>([
+    'google/gemini-2.5-pro-exp-03-25', // For some reason it doesn't work
+    'openrouter/auto',
 ])
 
 // More providers could be added here in the future
@@ -96,6 +101,10 @@ export async function createAIContext(): Promise<AIContext> {
         })
 
         for (const model of availableModels) {
+            if (EXCLUDED_MODELS.has(model.id)) {
+                continue // Skip excluded models
+            }
+
             const instance = openrouter.chat(model.id)
 
             const cost = getModelCost(model)
@@ -104,7 +113,7 @@ export async function createAIContext(): Promise<AIContext> {
                 featured: FEATURED_MODELS.has(model.id),
                 id: model.id,
                 provider: 'openrouter',
-                name: model.name,
+                name: FEATURED_MODELS.get(model.id) ?? model.name,
                 instance,
                 image: model.architecture?.input_modalities?.includes('image') ?? false,
                 file: model.architecture?.input_modalities?.includes('file') ?? false,
@@ -114,11 +123,14 @@ export async function createAIContext(): Promise<AIContext> {
     }
 
     if (process.env.OPENAI_API_KEY) {
+        const featured = !openrouter
+        const namePrefix = featured ? '' : '(OpenAI API) '
+
         models.set('openai_provider/gpt-3.5-turbo', {
             id: 'openai_provider/gpt-3.5-turbo',
-            featured: true,
+            featured,
             provider: 'openai',
-            name: 'GPT-3.5 Turbo',
+            name: `${namePrefix}GPT-3.5 Turbo`,
             instance: openai('gpt-3.5-turbo'),
             image: false,
             file: false,
@@ -126,9 +138,9 @@ export async function createAIContext(): Promise<AIContext> {
         })
         models.set('openai_provider/gpt-4', {
             id: 'openai_provider/gpt-4',
-            featured: true,
+            featured,
             provider: 'openai',
-            name: 'GPT-4',
+            name: `${namePrefix}GPT-4`,
             instance: openai('gpt-4'),
             image: false,
             file: false,
@@ -136,9 +148,9 @@ export async function createAIContext(): Promise<AIContext> {
         })
         models.set('openai_provider/gpt-4-turbo', {
             id: 'openai_provider/gpt-4-turbo',
-            featured: true,
+            featured,
             provider: 'openai',
-            name: 'GPT-4 Turbo',
+            name: `${namePrefix}GPT-4 Turbo`,
             instance: openai('gpt-4-turbo'),
             image: false,
             file: false,
@@ -146,9 +158,9 @@ export async function createAIContext(): Promise<AIContext> {
         })
         models.set('openai_provider/gpt-4o', {
             id: 'openai_provider/gpt-4o',
-            featured: true,
+            featured,
             provider: 'openai',
-            name: 'GPT-4o',
+            name: `${namePrefix}GPT-4o`,
             instance: openai('gpt-4o'),
             image: false,
             file: false,
@@ -156,9 +168,9 @@ export async function createAIContext(): Promise<AIContext> {
         })
         models.set('openai_provider/gpt-4o-mini', {
             id: 'openai_provider/gpt-4o-mini',
-            featured: true,
+            featured,
             provider: 'openai',
-            name: 'GPT-4o Mini',
+            name: `${namePrefix}GPT-4o Mini`,
             instance: openai('gpt-4o-mini'),
             image: false,
             file: false,
@@ -166,9 +178,9 @@ export async function createAIContext(): Promise<AIContext> {
         })
         models.set('openai_provider/o3-mini', {
             id: 'openai_provider/o3-mini',
-            featured: true,
+            featured,
             provider: 'openai',
-            name: 'O3 Mini',
+            name: `${namePrefix}O3 Mini`,
             instance: openai('o3-mini'),
             image: false,
             file: false,
@@ -176,9 +188,9 @@ export async function createAIContext(): Promise<AIContext> {
         })
         models.set('openai_provider/o4-mini', {
             id: 'openai_provider/o4-mini',
-            featured: true,
+            featured,
             provider: 'openai',
-            name: 'O4 Mini',
+            name: `${namePrefix}O4 Mini`,
             instance: openai('o4-mini'),
             image: false,
             file: false,

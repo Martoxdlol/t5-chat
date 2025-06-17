@@ -21,6 +21,7 @@ function DisplayMessageComponent(
     const isUserMessage = message.role === 'user'
 
     const [generated, setGenerated] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
 
     const trpc = useTRPC()
     const queryClient = useQueryClient()
@@ -28,18 +29,17 @@ function DisplayMessageComponent(
     useEffect(() => {
         const unsub = message.contentManager?.subscribe((content, status, error) => {
             setGenerated(content)
+            setError(error || null)
             if (status !== 'generating' && props.chatId) {
                 queryClient.setQueryData(trpc.chat.getChatMessages.queryKey({ chatId: props.chatId }), (prev) => {
                     if (!prev) return prev
 
                     return prev.map((msg) => {
-                        console.log('>>', content)
-
                         if (msg.index === message.index) {
                             return {
                                 ...msg,
                                 contentManager: undefined, // Clear the content manager after completion
-                                content: content,
+                                content: content || '',
                                 status,
                                 error,
                             } as ChatMessage
@@ -104,7 +104,10 @@ function DisplayMessageComponent(
                         </p>
                     ))}
                 {generationFailed && (
-                    <p className='font-semibold text-red-500 text-sm'>Generation failed. Please try again.</p>
+                    <div>
+                        <p className='font-semibold text-red-500 text-sm'>Generation failed. Please try again.</p>
+                        <span className='text-muted-foreground text-xs'>{error}</span>
+                    </div>
                 )}
 
                 {/* <div className='text-muted-foreground text-xs mt-1 flex gap-2 items-center'>

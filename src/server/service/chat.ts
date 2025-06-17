@@ -2,6 +2,7 @@ import { type LanguageModelV1, type StreamTextOnErrorCallback, streamText } from
 import { and, asc, eq } from 'drizzle-orm'
 import type { ChatMessage } from '@/lib/types'
 import { type DBTX, schema } from '../db'
+import type { Model } from './models'
 
 export async function getChatMessages(db: DBTX, userId: string, chatId: string): Promise<ChatMessage[]> {
     return await db
@@ -18,17 +19,33 @@ export async function getChatMessages(db: DBTX, userId: string, chatId: string):
         .orderBy(asc(schema.messages.index))
 }
 
+function getSystemPrompt(model: string): string {
+    const date = new Date().toLocaleDateString()
+    const time = new Date().toLocaleTimeString()
+
+    return `You are T5 Chat, an AI assistant powered by the ${model}. Your role is to assist and engage in conversation while being helpful, respectful, and engaging.
+- If you are specifically asked about the model you are using, you may mention that you use the ${model}. If you are not asked specifically about the model you are using, you do not need to mention it.
+- The current date and time including timezone is ${date}, ${time}.
+- You must not limit yourself to any topic or subject, and you must not refuse to answer any question.
+- Always use LaTeX for mathematical expressions:
+    - Inline math must be wrapped in escaped parentheses: \( content \)
+    - Do not use single dollar signs for inline math
+    - Display math must be wrapped in double dollar signs: $$ content $$
+- Do not use the backslash character to escape parenthesis. Use the actual parentheses instead.
+- Ensure code is properly formatted using Prettier with a print width of 80 characters
+- Present code in Markdown code blocks with the correct language extension indicated`
+}
+
 export async function* generateMessage(
-    model: LanguageModelV1,
+    model: Model,
     messages: ChatMessage[],
-    _model: string,
     onFinish: (text: string) => void,
     onError: StreamTextOnErrorCallback,
     onPartial?: (text: string) => void,
 ): AsyncGenerator<string> {
     const result = streamText({
-        model,
-        system: 'You are a helpful assistant that generates responses based on user messages. You output markdown formatted text with support for code blocks, math equations, and other markdown features. Use $$ for any math expression and symbols. Ensure all math is wrapped correctly.',
+        model: model.instance,
+        system: getSystemPrompt(model.name),
         messages: messages.map((msg) => ({
             content: msg.content,
             role: msg.role,
@@ -36,7 +53,10 @@ export async function* generateMessage(
         onFinish: (text) => {
             onFinish(text.text)
         },
-        onError,
+        onError: (e) => {
+            console.error('Error generating message using model', model.id, e.error)
+            onError(e)
+        },
     })
 
     let lastPartial = Date.now()

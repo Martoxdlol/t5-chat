@@ -151,7 +151,8 @@ export const chatRouter = router({
                     )
             }
 
-            async function handleError() {
+            async function handleError(e: { error: unknown }) {
+                console.error('Message generation error:', e)
                 await ctx.db
                     .update(schema.messages)
                     .set({
@@ -165,7 +166,7 @@ export const chatRouter = router({
                         ),
                     )
 
-                reject(new Error('Message generation failed'))
+                reject(new Error(String(e.error)))
             }
 
             function updateTitle(newTitle: string) {
@@ -219,7 +220,7 @@ export const chatRouter = router({
                 model: model.id,
                 firstResponseGenerator: ensureCompletionAsyncGenerator(
                     generateMessage(
-                        model.instance,
+                        model,
                         [
                             {
                                 content: input.prompt.text,
@@ -229,7 +230,6 @@ export const chatRouter = router({
                                 createdAt: createdAt,
                             },
                         ],
-                        input.prompt.model,
                         handleFinish,
                         handleError,
                         handlePartial,
@@ -405,7 +405,8 @@ export const chatRouter = router({
                     )
             }
 
-            async function handleError() {
+            async function handleError(e: { error: unknown }) {
+                console.error('Message generation error:', e)
                 await ctx.db
                     .update(schema.messages)
                     .set({
@@ -419,11 +420,11 @@ export const chatRouter = router({
                         ),
                     )
 
-                reject(new Error('Message generation failed'))
+                reject(new Error(String(e.error)))
             }
 
             const generator = ensureCompletionAsyncGenerator(
-                generateMessage(model.instance, messages, input.prompt.model, handleFinish, handleError, handlePartial),
+                generateMessage(model, messages, handleFinish, handleError, handlePartial),
             )
 
             return {

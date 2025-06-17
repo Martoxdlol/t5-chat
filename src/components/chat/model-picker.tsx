@@ -2,9 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { useTRPC } from '@/lib/api-client'
 import { Button } from '../ui/button'
+import { Input } from '../ui/input' // Added Input import
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { Separator } from '../ui/separator'
-import { Input } from '../ui/input' // Added Input import
 
 export const ModelPicker = memo(ModelPickerComponent)
 
@@ -14,7 +14,12 @@ function ModelPickerComponent(props: { value: string | null; onChange: (value: s
     const [isOpen, setIsOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('') // Added search term state
 
-    const { data: ai } = useQuery(trpc.models.queryOptions())
+    const { data: ai } = useQuery(
+        trpc.models.queryOptions(undefined, {
+            refetchOnMount: true,
+            staleTime: 1000 * 60 * 5, // 5 minutes
+        }),
+    )
 
     const selectedModel = useMemo(() => {
         if (!props.value) return undefined
@@ -44,7 +49,11 @@ function ModelPickerComponent(props: { value: string | null; onChange: (value: s
     const modelsToDisplay = useMemo(() => {
         // If there's a search term, filter all sorted models and ignore showAll/featured
         if (searchTerm) {
-            return sortedModels.filter((model) => model.name.toLowerCase().includes(searchTerm.toLowerCase()))
+            return sortedModels.filter(
+                (model) =>
+                    model.name.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+                    model.id.toLowerCase().includes(searchTerm.toLowerCase().trim()),
+            )
         }
         // If no search term, use showAll to pick between all sorted or just featured
         return showAll ? sortedModels : featuredModels
@@ -71,8 +80,8 @@ function ModelPickerComponent(props: { value: string | null; onChange: (value: s
                     {selectedModel === undefined ? 'Select model' : (selectedModel?.name ?? 'Unknown model')}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className='flex flex-col max-h-[calc(var(--screen-height)_-_100px)] w-[100vw] max-w-200 overflow-y-auto border-accent p-2 space-y-2'>
-                <div className='shrink-0 sticky top-0 z-10 bg-background'>
+            <PopoverContent className='flex max-h-[calc(var(--screen-height)_-_100px)] w-[100vw] max-w-200 flex-col space-y-2 overflow-y-auto border-accent p-2'>
+                <div className='sticky top-0 z-10 shrink-0 bg-background'>
                     <Input
                         autoFocus
                         type='text'
@@ -83,7 +92,7 @@ function ModelPickerComponent(props: { value: string | null; onChange: (value: s
                 </div>
 
                 {modelsToDisplay.length === 0 && searchTerm ? (
-                    <div className='p-4 text-center text-sm text-muted-foreground'>
+                    <div className='p-4 text-center text-muted-foreground text-sm'>
                         No models found for "{searchTerm}".
                     </div>
                 ) : (
@@ -129,21 +138,23 @@ function ModelPickerListComponent(props: {
 }) {
     if (props.models.length === 0) {
         // This message is shown if modelsToDisplay is empty and not due to an active search
-        return <div className='p-4 text-center text-sm text-muted-foreground'>No models to display.</div>
+        return <div className='p-4 text-center text-muted-foreground text-sm'>No models to display.</div>
     }
     return (
         <div className='flex w-full flex-col gap-1'>
             {/* Changed from grid to flex list */}
             {props.models.map((model) => (
                 <button
+                    type='button'
                     key={model.id}
                     onClick={() => props.onSelect(model)}
-                    className='hover:bg-accent text-left p-2 text-sm rounded-md flex justify-between'
+                    className='flex justify-between rounded-md p-2 text-left text-sm hover:bg-accent'
                 >
-                    <span>{model.name}</span>
-                    {/* <span className='text-xs text-muted-foreground text-right'>
-                        {model.cost.toFixed(2)}
-                    </span> */}
+                    <span>
+                        {model.featured ? '⭐ ' : ''}
+                        {model.name}
+                    </span>
+                    <span className='text-right text-muted-foreground text-xs'>{model.cost.toFixed(2)}</span>
                 </button>
             ))}
         </div>
