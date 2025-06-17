@@ -1,13 +1,18 @@
 import type { ChatMessage } from './types'
 
+export type MessageContentStatus = 'generating' | 'complete' | 'failed'
+
 export class MessageContent {
     content: string
-    completed: boolean = false
+    status: MessageContentStatus = 'generating'
+    result: Promise<void>
+    error?: string
 
-    subscribers = new Set<(content: string, completed: boolean) => void>()
+    subscribers = new Set<(content: string, status: MessageContentStatus, error: string | undefined) => void>()
 
-    constructor(message: Pick<ChatMessage, 'content' | 'generator'>) {
+    constructor(message: Pick<ChatMessage, 'content' | 'generator' | 'result'>) {
         this.content = message.content ?? ''
+        this.result = message.result ?? Promise.resolve()
         if (message.generator) {
             this.consumeGenerator(message.generator)
         }
@@ -16,24 +21,36 @@ export class MessageContent {
     private async consumeGenerator(generator: AsyncGenerator<string>): Promise<void> {
         for await (const chunk of generator) {
             this.content += chunk
-            this.notifySubscribers(this.content, this.completed)
+            this.notifySubscribers(this.content, this.status, undefined)
         }
-        this.completed = true
-        this.notifySubscribers(this.content, this.completed)
+
+        this.result
+            .then(() => {
+                this.status = 'complete'
+                this.notifySubscribers(this.content, this.status, undefined)
+            })
+            .catch((error) => {
+                console.error('Error consuming generator:', error)
+                this.status = 'failed'
+                this.error = error.message
+                this.notifySubscribers(this.content, this.status, error.message)
+            })
     }
 
-    subscribe(callback: (content: string, completed: boolean) => void): () => void {
+    subscribe(
+        callback: (content: string, status: MessageContentStatus, error: string | undefined) => void,
+    ): () => void {
         this.subscribers.add(callback)
 
-        this.notifySubscribers(this.content, this.completed)
+        this.notifySubscribers(this.content, this.status, this.error)
 
         return () => {
             this.subscribers.delete(callback)
         }
     }
 
-    notifySubscribers(content: string, completed: boolean): void {
-        this.subscribers.forEach((callback) => callback(content, completed))
+    notifySubscribers(content: string, status: MessageContentStatus, error: string | undefined): void {
+        this.subscribers.forEach((callback) => callback(content, status, error))
     }
 
     toJSON() {

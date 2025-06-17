@@ -4,9 +4,8 @@ import { cn } from '../../lib/utils'
 /**
  * This component is intended to avoid scroll when virtual keyboard is open on mobile devices.
  * Specially on IOS
- *
  * It does something similar to <meta name="viewport" content="interactive-widget=resizes-content" />
- * and updates css variable `--screen-height` with the height of the visual viewport.
+ * and updates css variable --screen-height with the height of the visual viewport.
  */
 export function Screen(props: ComponentProps<'div'>) {
     useLayoutEffect(() => {
@@ -23,6 +22,10 @@ export function Screen(props: ComponentProps<'div'>) {
             window.scrollTo(0, 0)
         }
 
+        function preventTouchScroll(e: TouchEvent) {
+            e.preventDefault()
+        }
+
         handleEvent()
 
         window.addEventListener('focusin', handleEvent, { signal: abortController.signal })
@@ -32,6 +35,10 @@ export function Screen(props: ComponentProps<'div'>) {
 
         window.visualViewport?.addEventListener('resize', handleEvent, { signal: abortController.signal })
         window.visualViewport?.addEventListener('scroll', handleEvent, { signal: abortController.signal })
+
+        // Prevent touch scrolling
+        window.addEventListener('touchstart', preventTouchScroll, { signal: abortController.signal })
+        window.addEventListener('touchmove', preventTouchScroll, { signal: abortController.signal })
 
         const timer = window.setInterval(() => {
             handleEvent()

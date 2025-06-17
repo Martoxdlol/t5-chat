@@ -108,6 +108,8 @@ export const chatRouter = router({
                 }
             })
 
+            const { reject, promise: result, resolve } = Promise.withResolvers<void>()
+
             async function handleFinish(text: string) {
                 await ctx.db
                     .update(schema.messages)
@@ -129,6 +131,8 @@ export const chatRouter = router({
                         credits: sql`${schema.user.credits} - ${messageCost}`,
                     })
                     .where(eq(schema.user.id, ctx.user.id))
+
+                resolve()
             }
 
             async function handlePartial(text: string) {
@@ -145,6 +149,23 @@ export const chatRouter = router({
                             eq(schema.messages.status, 'generating'),
                         ),
                     )
+            }
+
+            async function handleError() {
+                await ctx.db
+                    .update(schema.messages)
+                    .set({
+                        status: 'failed',
+                    })
+                    .where(
+                        and(
+                            eq(schema.messages.userId, ctx.user.id),
+                            eq(schema.messages.chatId, chatId),
+                            eq(schema.messages.index, 1),
+                        ),
+                    )
+
+                reject(new Error('Message generation failed'))
             }
 
             function updateTitle(newTitle: string) {
@@ -210,9 +231,11 @@ export const chatRouter = router({
                         ],
                         input.prompt.model,
                         handleFinish,
+                        handleError,
                         handlePartial,
                     ),
                 ),
+                result,
             }
         }),
 
@@ -339,6 +362,8 @@ export const chatRouter = router({
                     throw error
                 })
 
+            const { reject, promise: result, resolve } = Promise.withResolvers<void>()
+
             async function handleFinish(text: string) {
                 await ctx.db
                     .update(schema.messages)
@@ -360,6 +385,8 @@ export const chatRouter = router({
                         credits: sql`${schema.user.credits} - ${messageCost * messages.length}`,
                     })
                     .where(eq(schema.user.id, ctx.user.id))
+
+                resolve()
             }
 
             async function handlePartial(text: string) {
@@ -378,14 +405,32 @@ export const chatRouter = router({
                     )
             }
 
+            async function handleError() {
+                await ctx.db
+                    .update(schema.messages)
+                    .set({
+                        status: 'failed',
+                    })
+                    .where(
+                        and(
+                            eq(schema.messages.userId, ctx.user.id),
+                            eq(schema.messages.chatId, input.chatId),
+                            eq(schema.messages.index, responseMessageIndex),
+                        ),
+                    )
+
+                reject(new Error('Message generation failed'))
+            }
+
             const generator = ensureCompletionAsyncGenerator(
-                generateMessage(model.instance, messages, input.prompt.model, handleFinish, handlePartial),
+                generateMessage(model.instance, messages, input.prompt.model, handleFinish, handleError, handlePartial),
             )
 
             return {
                 generator,
                 userMessageIndex,
                 responseMessageIndex,
+                result,
             }
         }),
 

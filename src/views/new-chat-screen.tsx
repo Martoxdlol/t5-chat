@@ -55,6 +55,7 @@ export function NewChatScreen() {
                                 contentManager: new MessageContent({
                                     content: '',
                                     generator: chat.firstResponseGenerator,
+                                    result: chat.result,
                                 }),
                             },
                         ] as ChatMessage[]
@@ -82,7 +83,12 @@ export function NewChatScreen() {
                         })
                     })
 
+                    console.log(chat)
+
                     setTimeout(() => invalidateRemainingCredits(), 10_000)
+                })
+                .catch((error) => {
+                    console.error('Error creating new chat:', error)
                 })
         },
         [newChatMutation, queryClient, trpc, navigate, invalidateRemainingCredits],

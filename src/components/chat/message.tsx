@@ -26,19 +26,22 @@ function DisplayMessageComponent(
     const queryClient = useQueryClient()
 
     useEffect(() => {
-        const unsub = message.contentManager?.subscribe((content, finished) => {
+        const unsub = message.contentManager?.subscribe((content, status, error) => {
             setGenerated(content)
-            if (finished && props.chatId) {
+            if (status !== 'generating' && props.chatId) {
                 queryClient.setQueryData(trpc.chat.getChatMessages.queryKey({ chatId: props.chatId }), (prev) => {
                     if (!prev) return prev
 
                     return prev.map((msg) => {
+                        console.log('>>', content)
+
                         if (msg.index === message.index) {
                             return {
                                 ...msg,
                                 contentManager: undefined, // Clear the content manager after completion
                                 content: content,
-                                status: 'completed',
+                                status,
+                                error,
                             } as ChatMessage
                         }
                         return msg
@@ -81,7 +84,7 @@ function DisplayMessageComponent(
                     'animate-pulse': message.status === 'prompted',
                 })}
             >
-                <div className='max-w-[75%] rounded-xl bg-primary/50 px-3 py-2 sm:max-w-[70%] md:max-w-[65%]'>
+                <div className='max-w-[75%] overflow-auto rounded-xl bg-primary/50 px-3 py-2 sm:max-w-[70%] md:max-w-[65%]'>
                     <RenderMarkdown code={content} />
                 </div>
             </div>

@@ -62,7 +62,7 @@ export function ChatScreen() {
                         model: 'todo:implement-model',
                     },
                 })
-                .then(({ generator, responseMessageIndex, userMessageIndex }) => {
+                .then(({ generator, responseMessageIndex, userMessageIndex, result }) => {
                     const userMsg: ChatMessage = {
                         index: userMessageIndex,
                         role: 'user',
@@ -81,6 +81,7 @@ export function ChatScreen() {
                         contentManager: new MessageContent({
                             content: '',
                             generator,
+                            result,
                         }),
                     }
 

@@ -15,6 +15,8 @@ export type ChatMessage = {
     content: string
     createdAt: Date
     generator?: AsyncGenerator<string>
+    result?: Promise<void>
     contentManager?: MessageContent
     model?: string
+    error?: string
 }

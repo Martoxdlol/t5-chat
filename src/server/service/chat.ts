@@ -1,4 +1,4 @@
-import { type LanguageModelV1, streamText } from 'ai'
+import { type LanguageModelV1, type StreamTextOnErrorCallback, streamText } from 'ai'
 import { and, asc, eq } from 'drizzle-orm'
 import type { ChatMessage } from '@/lib/types'
 import { type DBTX, schema } from '../db'
@@ -23,6 +23,7 @@ export async function* generateMessage(
     messages: ChatMessage[],
     _model: string,
     onFinish: (text: string) => void,
+    onError: StreamTextOnErrorCallback,
     onPartial?: (text: string) => void,
 ): AsyncGenerator<string> {
     const result = streamText({
@@ -35,6 +36,7 @@ export async function* generateMessage(
         onFinish: (text) => {
             onFinish(text.text)
         },
+        onError,
     })
 
     let lastPartial = Date.now()
