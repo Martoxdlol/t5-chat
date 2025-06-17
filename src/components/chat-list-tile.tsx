@@ -46,8 +46,8 @@ function ChatListTileComponent(props: {
                     {props.emoji}
                 </div>
                 <div className='min-w-0 shrink grow'>
-                    <p className='w-full overflow-hidden text-ellipsis text-nowrap'>{props.title}</p>
-                    <p className='w-full overflow-hidden text-ellipsis text-nowrap text-muted-foreground text-xs'>
+                    <p className='w-full overflow-hidden text-ellipsis whitespace-nowrap'>{props.title}</p>
+                    <p className='w-full overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground text-xs'>
                         {props.lastMessage}
                     </p>
                 </div>

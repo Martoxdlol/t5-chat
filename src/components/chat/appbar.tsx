@@ -3,7 +3,9 @@ import { ArrowLeftIcon, EllipsisVerticalIcon, Trash2Icon } from 'lucide-react'
 import { memo, useMemo } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { useTRPC } from '@/lib/api-client'
+import { cn } from '@/lib/utils'
 import { IconButton } from '../icon-button'
+import { usePrimaryScrollY } from '../primary-scroll-provider'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,8 +13,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
-import { usePrimaryScrollY } from '../primary-scroll-provider'
-import { cn } from '@/lib/utils'
 
 export const ChatAppBar = memo(ChatAppBarComponent)
 
@@ -87,7 +87,7 @@ function ChatAppBarContent() {
                     aria-label='back'
                 />
             )}
-            <h2 className='min-w-0 shrink grow overflow-hidden text-ellipsis text-nowrap'>{chatTitle}</h2>
+            <h2 className='min-w-0 shrink grow overflow-hidden text-ellipsis whitespace-nowrap'>{chatTitle}</h2>
             {chatId && (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
