@@ -104,6 +104,7 @@ function ModelPickerComponent(props: { value: string | null; onChange: (value: s
                             setSearchTerm('') // Clear search on selection
                         }}
                         selectedModel={selectedModel?.id}
+                        showAll={showAll}
                     />
                 )}
 
@@ -135,6 +136,7 @@ function ModelPickerListComponent(props: {
     models: Array<{ id: string; name: string; featured: boolean; cost: number }>
     onSelect: (model: { id: string; name: string }) => void
     selectedModel?: string
+    showAll: boolean
 }) {
     if (props.models.length === 0) {
         // This message is shown if modelsToDisplay is empty and not due to an active search
@@ -151,7 +153,7 @@ function ModelPickerListComponent(props: {
                     className='flex justify-between rounded-md p-2 text-left text-sm hover:bg-accent'
                 >
                     <span>
-                        {model.featured ? '⭐ ' : ''}
+                        {model.featured && props.showAll ? '⭐ ' : ''}
                         {model.name}
                     </span>
                     <span className='text-right text-muted-foreground text-xs'>{model.cost.toFixed(2)}</span>
