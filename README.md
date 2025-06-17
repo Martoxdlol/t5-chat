@@ -32,6 +32,8 @@ Set the corresponding envs using `fly secrets set ENV_NAME=env_value` command. M
 
 - Chatting with different models
 - Using OpenAI api and or using OpenRouter
+- Streaming responses
+- Markdown and latex support
 - Authentication with Google Oauth
 - Saving conversations in the database
 - PWA and offline support (readonly, you can't prompt offline)
