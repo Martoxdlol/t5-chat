@@ -7,13 +7,15 @@ import { TRPCProvider, trpc } from './api-client'
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            gcTime: 1000 * 60 * 60 * 24 * 7, // 7 days
+            gcTime: 1000 * 60 * 60 * 24, // 1 days
             refetchOnMount: true,
+            staleTime: 1000 * 60 * 20, // 20 minutes
         },
     },
 })
 
 const localStoragePersister = createSyncStoragePersister({
+    key: 'cache-v1',
     storage: window.localStorage,
 })
 
